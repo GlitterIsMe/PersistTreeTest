@@ -3,6 +3,7 @@ project(PersistTreeTest)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_STANDARD_REQUIRED ON)
+# it will cause DSO link error if don't define this
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -lpmem)
 
 set(src
