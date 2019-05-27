@@ -11,9 +11,9 @@ namespace rocksdb {
             exit(-1);
         }
         if(is_pmem_){
-            printf("is pmem");
+            printf("is pmem\n");
         }else{
-            printf("is not pmem");
+            printf("is not pmem\n");
         }
         capacity_ = size;
         cur_index_ = pmemaddr_;
