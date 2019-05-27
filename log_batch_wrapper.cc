@@ -161,7 +161,7 @@ namespace rocksdb {
         //log_->Put(key.c_str(), key.size()); // KV log write to AEP directly, avoiding data loss.
 #ifndef DRAM_CANCEL_LOG
         char *log = allocator_->Allocate(key.size());
-        if (allocator_->is_pmem){
+        if (allocator_->is_pmem()){
             pmem_memcpy_persist(log, key.c_str(), key.size());
         }else{
             memcpy(log, key.c_str(), key.size());
