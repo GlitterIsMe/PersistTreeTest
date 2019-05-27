@@ -3,6 +3,7 @@ project(PersistTreeTest)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -lpmem)
 
 set(src
         flush_nvm.cc
@@ -13,7 +14,6 @@ set(src
         persistent_skiplist_wrapper.cc
         random.cc)
 
-#add_library(LIB ${src})
 
 include(FindThreads)
 
