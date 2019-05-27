@@ -4,6 +4,18 @@ project(PersistTreeTest)
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_STANDARD_REQUIRED ON)
 
+set(src
+        flush_nvm.cc
+        log_batch.cc
+        log_batch_wrapper.cc
+        persistent_skip_list.cc
+        persistent_skiplist_no_transaction.cc
+        persistent_skiplist_wrapper.cc
+        random.cc
+        motivation1_main.cc)
+
+add_library(PersistTreeTest ${src})
+
 include(FindThreads)
 
 find_package(PkgConfig QUIET)
@@ -19,18 +31,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 #aux_source_directory(. src)
 
-set(src
-        flush_nvm.cc
-        log_batch.cc
-        log_batch_wrapper.cc
-        persistent_skip_list.cc
-        persistent_skiplist_no_transaction.cc
-        persistent_skiplist_wrapper.cc
-        random.cc)
-
-add_library(PersistTreeTest ${src})
-
-add_executable(PersistTreeTest motivation1_main.cc)
+add_executable(PersistTreeTest)
 
 target_include_directories(PersistTreeTest PUBLIC ${LIBPMEM_INCLUDE_DIRS} . ..)
 target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
