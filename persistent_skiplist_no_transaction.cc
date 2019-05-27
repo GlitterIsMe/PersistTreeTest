@@ -10,6 +10,11 @@ namespace rocksdb {
             printf("PersistentAllocator: map error\n");
             exit(-1);
         }
+        if(is_pmem_){
+            printf("is pmem");
+        }else{
+            printf("is not pmem");
+        }
         capacity_ = size;
         cur_index_ = pmemaddr_;
     }
