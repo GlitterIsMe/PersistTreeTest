@@ -161,10 +161,14 @@ namespace rocksdb {
         //log_->Put(key.c_str(), key.size()); // KV log write to AEP directly, avoiding data loss.
 #ifndef DRAM_CANCEL_LOG
         char *log = allocator_->Allocate(key.size());
-        pmem_memcpy_persist(log, key.c_str(), key.size());
+        if (allocator_->is_pmem){
+            pmem_memcpy_persist(log, key.c_str(), key.size());
+        }else{
+            memcpy(log, key.c_str(), key.size());
+            pmem_msync(log, key.size());
+        };
 #endif
         skiplist_->Insert(key);
-
 		cur_mem_skiplist_size_ += key.size();
         if (cur_mem_skiplist_size_ >= max_mem_skiplist_size_) {
 			Flush();
