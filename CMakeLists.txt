@@ -14,7 +14,7 @@ set(src
         random.cc
         motivation1_main.cc)
 
-add_library(PersistTreeTest ${src})
+add_library(LIB ${src})
 
 include(FindThreads)
 
@@ -31,7 +31,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 #aux_source_directory(. src)
 
-add_executable(PersistTreeTest)
+add_executable(PersistTreeTest ${LIB})
 
 target_include_directories(PersistTreeTest PUBLIC ${LIBPMEM_INCLUDE_DIRS} . ..)
 target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
