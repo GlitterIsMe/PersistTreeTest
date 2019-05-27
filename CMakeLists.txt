@@ -6,10 +6,15 @@ set(CXX_STANDARD_REQUIRED ON)
 # it will cause DSO link error if don't define this
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -lpmem)
 
-set(ENV{CZL_DEBUG})
-set(ENV{ENERY_1G_PRINT})
-set(ENV{DRAM_CANCLE_LOG})
-set(ENV{CAL_ACCESS_COUNT})
+#set(ENV{CZL_DEBUG})
+#set(ENV{ENERY_1G_PRINT})
+#set(ENV{DRAM_CANCLE_LOG})
+#set(ENV{CAL_ACCESS_COUNT})
+
+add_definitions(-DCZL_DEBUG)
+add_definitions(-DENERY_1G_PRINT)
+add_definitions(-DDRAM_CANCLE_LOG)
+add_definitions(-DCAL_ACCESS_COUNT)
 
 set(src
         flush_nvm.cc
