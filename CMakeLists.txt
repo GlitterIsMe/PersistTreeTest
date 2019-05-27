@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -lpmem)
 #set(ENV{CAL_ACCESS_COUNT})
 
 add_definitions(-DCZL_DEBUG)
-add_definitions(-DENERY_1G_PRINT)
+add_definitions(-DEVERY_1G_PRINT)
 add_definitions(-DDRAM_CANCLE_LOG)
 add_definitions(-DCAL_ACCESS_COUNT)
 
