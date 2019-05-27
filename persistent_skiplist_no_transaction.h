@@ -20,6 +20,10 @@ namespace rocksdb {
 
         size_t BlockSize();
 
+        bool is_pmem(){
+            return is_pmem_;
+        }
+
     private:
         char* pmemaddr_;
         size_t mapped_len_;

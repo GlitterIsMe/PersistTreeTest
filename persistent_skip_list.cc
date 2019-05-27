@@ -32,9 +32,15 @@ namespace rocksdb {
     }
 
     Node* Persistent_SkipList::NewNode(const std::string &key, int height) {
+        bool is_pmem = allocator_->is_pmem();
         char* mem = allocator_->Allocate(sizeof(Node) + sizeof(Node*) * (height - 1));
         char* pkey = allocator_->Allocate(key.size());
-        pmem_memcpy_persist(pkey, key.c_str(), key.size());
+        if(is_pmem){
+            pmem_memcpy_persist(pkey, key.c_str(), key.size());
+        }else{
+            memcpy(pkey, key.c_str(), key.size());
+            pmem_msync(pkey, key.size());
+        }
         return new (mem) Node(pkey);
     }
 
@@ -172,10 +178,15 @@ namespace rocksdb {
         }
 
         Node* x = NewNode(key, height);
+        bool is_pmem = allocator_->is_pmem();
         for(int i = 0; i < height; i++){
             x->SetNext(i, prev_[i]->Next(i));
             prev_[i]->SetNext(i ,x);
-            pmem_persist(prev_[i], sizeof(Node*));
+            if(is_pmem){
+                pmem_persist(prev_[i], sizeof(Node*));
+            }else{
+                pmem_msync(prev_[i], sizeof(Node*));
+            }
             prev_[i] = x;
         }
         //prev_[0] = x;
