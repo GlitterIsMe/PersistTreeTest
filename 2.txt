@@ -1,0 +1,14 @@
+DEBUG: parse_input                    127:"num=8"
+DEBUG: parse_input                    143:"buf_size:65553"
+DEBUG: parse_input                    144:"using_existing_data: 0(0:no, 1:yes)"
+DEBUG: parse_input                    145:"test_type:0(0:NVM, 1:DRAM)  value_size:65536"
+DEBUG: parse_input                    146:"ops_type:1      ops_num:10000"
+DEBUG: parse_input                    147:"mem_skiplist_size:1MB   skiplist_max_num:1"
+DEBUG: main                           178:"prepare to create PATH_LOG:/home/czl/pmem0/skiplist_test_dir/dram_skiplist"
+DEBUG: write_to_nvm                    98:"start!"
+DEBUG: write_to_nvm                   121:"end!"
+-------------   write to nvm  start: ----------------------
+key: 16B, value: 65536B, number: 10000
+time: 0.4707 s,  speed: 1328.185 MB/s, IOPS: 21245.8 IOPS
+-------------   write to nvm  start: ----------------------
+nvm skiplist: time = 142322, all_cnt = 9988, head_cnt = 5004, suit_cnt = 12
