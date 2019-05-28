@@ -20,7 +20,7 @@ using namespace std;
 const size_t NVM_SIZE = 150 * (1ULL << 30);             // 50GB
 //const size_t NVM_SIZE = 133175443456;             // 50GB
 //const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
-const size_t KEY_SIZE = 16;         // 16B
+const size_t KEY_SIZE = 18;         // 16B
 
 // default parameter
 bool using_existing_data = false;
@@ -105,18 +105,18 @@ void write_to_nvm()
     string value(VALUE_SIZE, 'v');
     start_time = get_now_micros();
     last_tmp_time = start_time;
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
+    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
 
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
+        snprintf(buf, sizeof(buf), "%08d%10d%s", number, i, value.c_str());
         string data(buf);
         skiplist_nvm->Insert(data);
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
             tmp_time = get_now_micros();
             tmp_use_time = tmp_time - last_tmp_time;
-            printf("every 1GB(%dGB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
+            printf("every 64MBB(%dnd 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
             last_tmp_time = tmp_time;
         }
 #endif

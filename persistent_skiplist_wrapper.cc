@@ -25,11 +25,13 @@ namespace rocksdb {
         for(auto list : skiplists_){
             list = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num ,per_1g_num);
         }
+        key_size_ = key_size;
     }
 
     void PersistentSkiplistWrapper::Insert(const std::string &key) {
-        uint64_t hash = CityHash64(key.c_str(), key.size());
+        uint64_t hash = CityHash64(key.c_str(), key_size_);
         size_t slot = hash % slots_num;
+        printf("into slot %d", slot);
         if(slot > slots_num){
             std::cout<<"wrong slot num "<<slot<<std::endl;
             exit(-1);
