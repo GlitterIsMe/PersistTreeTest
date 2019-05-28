@@ -110,7 +110,7 @@ void write_to_nvm()
     // per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
 
     // 改成64MB统计一次
-    per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
+    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
