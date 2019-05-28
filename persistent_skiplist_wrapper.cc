@@ -1,5 +1,6 @@
 #include "persistent_skiplist_wrapper.h"
 #include <city.h>
+#include <string>
 
 namespace rocksdb {
 
@@ -31,7 +32,6 @@ namespace rocksdb {
     void PersistentSkiplistWrapper::Insert(const std::string &key) {
         uint64_t hash = CityHash64(key.c_str(), key_size_);
         size_t slot = hash % slots_num;
-        printf("into slot %d", slot);
         if(slot > slots_num){
             std::cout<<"wrong slot num "<<slot<<std::endl;
             exit(-1);

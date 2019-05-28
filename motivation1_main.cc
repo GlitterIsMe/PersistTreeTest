@@ -109,7 +109,7 @@ void write_to_nvm()
 
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%10d%s", number, i, value.c_str());
+        snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
         string data(buf);
         skiplist_nvm->Insert(data);
 #ifdef EVERY_1G_PRINT
