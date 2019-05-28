@@ -53,3 +53,5 @@ target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${CMAKE_THREAD_LIBS_I
 
 target_include_directories(PersistTreeTest PUBLIC ${LIBPMEMOBJ++_INCLUDE_DIRS} . ..)
 target_link_libraries(PersistTreeTest ${LIBPMEMOBJ++_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
+target_link_libraries(PersistTreeTest cityhash)
