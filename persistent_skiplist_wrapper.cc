@@ -30,7 +30,8 @@ namespace rocksdb {
     }
 
     void PersistentSkiplistWrapper::Insert(const std::string &key) {
-        uint64_t hash = CityHash64WithSeed(key.c_str(), key_size_, 0);
+        std::string prefix = key.substr(0, key_size_);
+        uint64_t hash = CityHash64WithSeed(prefix.c_str(), prefix.size(), 0);
         size_t slot = hash % slots_num;
         if(slot > slots_num){
             std::cout<<"wrong slot num "<<slot<<std::endl;
