@@ -1,15 +1,18 @@
 #include "persistent_skiplist_wrapper.h"
+#include "city.h"
 
 namespace rocksdb {
 
     PersistentSkiplistWrapper::PersistentSkiplistWrapper() {
         allocator_ = nullptr;
-        skiplist_ = nullptr;
+        for(int i = 0; i < slots_num; i++){
+            skiplists_[i] = nullptr;
+        }
     }
 
     PersistentSkiplistWrapper::~PersistentSkiplistWrapper() {
-        if (skiplist_ != nullptr) {
-            delete skiplist_;
+        for(auto list : skiplists_){
+            delete list;
         }
 
         if (allocator_ != nullptr) {
@@ -19,25 +22,40 @@ namespace rocksdb {
 
     void PersistentSkiplistWrapper::Init(const std::string& path, uint64_t size, int32_t max_height, int32_t branching_factor, size_t key_size, uint64_t opt_num,size_t per_1g_num) {
         allocator_ = new PersistentAllocator(path, size);
-        skiplist_ = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num ,per_1g_num);
-        key_size_ = key_size;
+        for(auto list : skiplists_){
+            list = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num ,per_1g_num);
+        }
     }
 
     void PersistentSkiplistWrapper::Insert(const std::string &key) {
-        skiplist_->Insert(key);
+        uint64_t hash = CityHash64(key.c_str(), key.size());
+        size_t slot = hash % slots_num;
+        if(slot > slots_num){
+            std::cout<<"wrong slot num "<<slot<<std::endl;
+            exit(-1);
+        }
+        skiplists_[slot]->Insert(key);
     }
 
     void PersistentSkiplistWrapper::Print() {
-        skiplist_->Print();
+        for(auto list : skiplists_){
+            list->Print();
+        }
+
     }
 
     void PersistentSkiplistWrapper::PrintLevelNum() {
-        skiplist_->PrintLevelNum();
+        for(auto list : skiplists_){
+            list->PrintLevelNum();
+        }
+
     }
 
 #ifdef CAL_ACCESS_COUNT
     void PersistentSkiplistWrapper::PrintAccessTime() {
-        skiplist_->PrintAccessTime();
+        for(auto list : skiplists_){
+            list->PrintAccessTime();
+        }
     }
 #endif
 }

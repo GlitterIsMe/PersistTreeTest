@@ -3,6 +3,10 @@
 #include "persistent_skiplist_no_transaction.h"
 #include "basic_define.h"
 #include "persistent_skip_list.h"
+#include <array>
+using std::array;
+
+const size_t slots_num = 1024;
 
 namespace rocksdb {
 
@@ -26,8 +30,7 @@ class PersistentSkiplistWrapper {
 
     private:
         PersistentAllocator* allocator_;
-        Persistent_SkipList* skiplist_;
-        size_t key_size_;
+        array<Persistent_SkipList*, slots_num> skiplists_;
     };
 }
 
