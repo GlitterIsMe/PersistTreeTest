@@ -20,7 +20,7 @@ using namespace std;
 const size_t NVM_SIZE = 150 * (1ULL << 30);             // 150GB
 //const size_t NVM_SIZE = 133175443456;             // devdax设备的实际大小
 //const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
-const size_t KEY_SIZE = 16;         // 16B
+const size_t KEY_SIZE = 18;         // 16B
 
 // default parameter
 bool using_existing_data = false;
@@ -79,7 +79,7 @@ void write_to_dram()
     //string batch;
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
+        snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
         string insert_data(buf);
         skiplist_dram->Insert(insert_data);
 
@@ -120,7 +120,7 @@ void write_to_nvm()
         if ((i % per_1g_num) == 0) {
             tmp_time = get_now_micros();
             tmp_use_time = tmp_time - last_tmp_time;
-            printf("every 1GB(%dGB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
+            printf("every 64MB(%dth 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
             last_tmp_time = tmp_time;
         }
 #endif
@@ -168,7 +168,7 @@ int parse_input(int num, char **para)
  *    @value_size
  *    @ops_type: Read=0, Write=1
  *    @ops_num: data_size = @value_size * @ops_num
- *    @mem_skiplist_size: limit skiplist size(MB) in DRAM. It also used to initilize DRAM skiplist
+ *    @mem_skiplist_size: limit skiplist size(KBytes) in DRAM. It also used to initilize DRAM skiplist
  *    @skiplist_max_num: allow maximum number skiplist not dealt by background thread.
  *    @storage_type: 0:skiplist, 1:B-Tree, 2:B+ Tree        // To Be Done
  */
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
         tpool = new ThreadPool(2);          // create threadpool(thread number = 2)
 
         skiplist_dram = new rocksdb::SkiplistWriteNVM();
-        skiplist_dram->Init(PATH_LOG, skiplist_nvm, 12, 4, mem_skiplist_size * 1024 * 1024, skiplist_max_num, KEY_SIZE);
+        skiplist_dram->Init(PATH_LOG, skiplist_nvm, 12, 4, mem_skiplist_size * 1024, skiplist_max_num, KEY_SIZE);
         
         thread t(write_to_dram); // create new thread, beginning with write_to_dram()
 

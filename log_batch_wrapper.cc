@@ -52,7 +52,13 @@ namespace rocksdb {
 #endif
 
     // one_log_size equal to max_mem_skiplist_size_
-    void SkiplistWriteNVM::Init(const std::string &path, PersistentSkiplistWrapper *skiplist_nvm, int32_t max_height, int32_t branching_factor, uint64_t one_log_size, size_t skiplist_max_num, size_t key_size)
+    void SkiplistWriteNVM::Init(const std::string &path,
+            PersistentSkiplistWrapper *skiplist_nvm,
+            int32_t max_height,
+            int32_t branching_factor,
+            uint64_t one_log_size,
+            size_t skiplist_max_num,
+            size_t key_size)
     {
         skiplist_ = nullptr;
         max_height_ = max_height;
@@ -160,6 +166,7 @@ namespace rocksdb {
         // if you want to use @parameter(BATCH_NUM), please comment next line code
         //log_->Put(key.c_str(), key.size()); // KV log write to AEP directly, avoiding data loss.
 #ifndef DRAM_CANCEL_LOG
+// 如果没有定义这个就是不写LOG的方案
         char *log = allocator_->Allocate(key.size());
         if (allocator_->is_pmem()){
             pmem_memcpy_persist(log, key.c_str(), key.size());
