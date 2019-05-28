@@ -75,7 +75,7 @@ void write_to_dram()
     
     start_time = get_now_micros();
     last_tmp_time = start_time;
-    size_t per_1g_num = (1024 * 1000) / VALUE_SIZE * 1000;
+    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     //string batch;
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
@@ -87,7 +87,7 @@ void write_to_dram()
         if ((i % per_1g_num) == 0) {
             tmp_time = get_now_micros();
             tmp_use_time = tmp_time - last_tmp_time;
-            printf("every 1GB (%dGB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
+            printf("every 64MB (%dst 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
             last_tmp_time = tmp_time;
         }
 #endif

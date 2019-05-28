@@ -228,6 +228,7 @@ AEP_LOG::AEP_LOG(pool_base &pop,uint64_t entry_size):pop_(pop),entry_size_(entry
         } else {
             is_same_node = true;
             printf("Memory_SkipList::Insert() key is equal\n");
+            return;
         }
 
         if (is_same_node) {
