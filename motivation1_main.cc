@@ -13,9 +13,9 @@ using namespace std;
 
 #define PATH "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist"
 
-#define PATH "/dev/dax1.0"
+//#define PATH "/dev/dax1.0"
 
-//#define PATH_LOG "/home/czl/pmem0/skiplist_test_dir/dram_skiplist"
+#define PATH_LOG "/home/czl/pmem0/skiplist_test_dir/dram_skiplist"
 
 const size_t NVM_SIZE = 150 * (1ULL << 30);             // 50GB
 //const size_t NVM_SIZE = 133175443456;             // 50GB
