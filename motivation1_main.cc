@@ -153,7 +153,7 @@ int parse_input(int num, char **para)
     CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
     CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, VALUE_SIZE);
     CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
-    CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
+    CZL_PRINT("mem_skiplist_size:%uKB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
 
     assert((test_type>>1) == 0);
     assert((VALUE_SIZE & (VALUE_SIZE-1)) == 0);
