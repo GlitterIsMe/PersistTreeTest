@@ -105,8 +105,12 @@ void write_to_nvm()
     string value(VALUE_SIZE, 'v');
     start_time = get_now_micros();
     last_tmp_time = start_time;
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
+    // *号前面是计算1MB有多少条记录，1GB有1024MB，所以再乘一个1024
+    // 所以为什么不直接1024 * 1024 * 1024 / VALUE_SIZE，看了半天
+    // per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
 
+    // 改成64MB统计一次
+    per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
