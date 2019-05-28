@@ -39,8 +39,10 @@ endif()
 
 link_directories(${LIBPMEM_LIBRARY_DIRS})
 link_directories(${LIBPMEMOBJ++_LIBRARY_DIRS})
+link_directories(/usr/local/lib)
 
 include_directories(${PROJECT_SOURCE_DIR})
+include_directories(/usr/local/include)
 
 #aux_source_directory(. src)
 
