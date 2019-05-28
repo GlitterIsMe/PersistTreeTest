@@ -169,6 +169,7 @@ namespace rocksdb {
             // 直接覆盖数据，不需要新建节点
             ; // impossible
             printf("key is equal\n");
+            return;
         }
 
         int height = RandomHeight();
