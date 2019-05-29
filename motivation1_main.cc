@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define PATH "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist"
+#define PATH "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist2"
 
 //#define PATH "/dev/dax1.0"
 
