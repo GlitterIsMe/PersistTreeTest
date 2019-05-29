@@ -131,7 +131,8 @@ namespace rocksdb {
 #ifdef CAL_ACCESS_COUNT
         opt_1g_num_ ++;
 #endif
-        int res = CompareKeyAndNode(key, prev_[0]);
+        // 比较待插入节点与prev[0]的关系
+/*        int res = CompareKeyAndNode(key, prev_[0]);
 // #ifdef CAL_ACCESS_COUNT
 //         const char *ckey = key.c_str();
 //         PrintKey(ckey);
@@ -140,8 +141,10 @@ namespace rocksdb {
 //         printf("\n");
 // #endif
         if (res > 0) {
+            // 大于prev0
             // key is after prev_[0]
             if (prev_[0]->Next(0) == nullptr) {
+                // prev的next为空，直接插入prev0后面
 #ifdef CAL_ACCESS_COUNT
                 suit_cnt_ += 1;
 #endif
@@ -164,12 +167,24 @@ namespace rocksdb {
 #endif
         } else if (res < 0) {
             // 从头开始遍历查找
+            // 小于prev0
             FindLessThan(key, prev_);
         } else {
             // 直接覆盖数据，不需要新建节点
             ; // impossible
             printf("key is equal\n");
             return;
+        }*/
+
+        if(!KeyIsAfterNode(key, prev_[0]->Next(0)) && (prev_[0] == head_ || KeyIsAfterNode(key, prev_[0]))){
+            for(size_t i = 1; i < prev_height_; i++){
+                prev_[i] = prev_[0];
+#ifdef CAL_ACCESS_COUNT
+                cnt_time_++;
+#endif
+            }
+        }else{
+            FindLessThan(key, prev_);
         }
 
         int height = RandomHeight();

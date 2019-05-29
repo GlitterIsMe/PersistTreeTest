@@ -121,6 +121,9 @@ void write_to_nvm()
         }
 #endif
     }
+#ifdef CAL_ACCESS_COUNT
+    skiplist_nvm->PrintAccessTime();
+#endif
     skiplist_nvm->PrintLevelNum();
     skiplist_nvm->Print();
     CZL_PRINT("end!");
