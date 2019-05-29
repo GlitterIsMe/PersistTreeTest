@@ -185,7 +185,7 @@ namespace rocksdb {
 #endif
             }
         }else{
-            FindLessThan(key, prev_);
+            FindNextNode(key, prev_);
         }
 
         int height = RandomHeight();
@@ -257,7 +257,7 @@ namespace rocksdb {
         }
 
         bool res = ((last_num < num) || ((last_num == num) && (last_seq_num < seq_num)));
-        if (res == false) {
+        if (!res) {
             printf("----------------error: DRAM skiplist is not in order!!! -----------------------------\n\n\n\n");
         }
 
