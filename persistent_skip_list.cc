@@ -200,10 +200,14 @@ namespace rocksdb {
             }else{
                 pmem_msync(prev_[i], sizeof(Node*));
             }
-            prev_[i] = x;
+            //prev_[i] = x;
         }
-        //prev_[0] = x;
-        //pmem_persist(prev_[0], sizeof(Node*));
+        prev_[0] = x;
+        if(is_pmem){
+            pmem_persist(prev_[0], sizeof(Node*));
+        }else{
+            pmem_msync(prev_[0], sizeof(Node*));
+        }
         prev_height_ = static_cast<uint16_t >(height);
     }
 
