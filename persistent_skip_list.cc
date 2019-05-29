@@ -179,7 +179,7 @@ namespace rocksdb {
 #endif
             }
         }else{
-            FindLessThan(key, prev_);
+            FindNextNode(key, prev_);
         }
 
         int height = RandomHeight();
