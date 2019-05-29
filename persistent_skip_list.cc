@@ -54,11 +54,6 @@ namespace rocksdb {
     }
 
     bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n) const {
-        if((n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0)){
-            std::string lst_key(n->key_, 18);
-            std::string this_key(key.c_str(), 18);
-            printf("%s is after %s\n", lst_key.c_str(), this_key.c_str());
-        }
         return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
     }
 
