@@ -116,7 +116,10 @@ void write_to_nvm()
         if ((i % per_1g_num) == 0) {
             tmp_time = get_now_micros();
             tmp_use_time = tmp_time - last_tmp_time;
-            printf("every 64MBB(%dnd 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
+            printf("every 64MBB(%dnd 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
+                    (i / per_1g_num), 1.0 * tmp_use_time * 1e-6,
+                    1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576,
+                    1.0 * per_1g_num * 1e6 / tmp_use_time);
             last_tmp_time = tmp_time;
         }
 #endif
