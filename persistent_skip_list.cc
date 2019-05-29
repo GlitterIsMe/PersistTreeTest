@@ -54,6 +54,11 @@ namespace rocksdb {
     }
 
     bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n) const {
+        if((n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0)){
+            std::string lst_key(n->key_, 18);
+            std::string this_key(key.c_str(), 18);
+            printf("%s is after %s\n", lst_key.c_str(), this_key.c_str());
+        }
         return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
     }
 
@@ -98,7 +103,8 @@ namespace rocksdb {
     {
         // 从prev[level]节点往后查找合适的node
         int level = GetMaxHeight() - 1;
-        Node* x = prev[level];
+        //Node* x = prev[level];
+        Node* x = head_;
 #ifdef CAL_ACCESS_COUNT
         uint64_t cnt = 0;
         all_cnt_ += 1;
@@ -246,7 +252,7 @@ namespace rocksdb {
             num = (str[i] - '0') + 10 * num;
         }
         
-        for (int i = 8; i < 16; i++) {
+        for (int i = 8; i < 18; i++) {
             seq_num = (str[i] - '0') + 10 * seq_num;
         }
 
