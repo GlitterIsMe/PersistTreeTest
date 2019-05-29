@@ -182,7 +182,7 @@ int main(int argc, char **argv)
         cout << "parse parameter failed!" << endl;
         return 0;
     }
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
+    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     skiplist_nvm = new rocksdb::PersistentSkiplistWrapper();
     skiplist_nvm->Init(PATH, NVM_SIZE, 20, 2, KEY_SIZE,ops_num,per_1g_num);
     
