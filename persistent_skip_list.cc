@@ -104,6 +104,7 @@ namespace rocksdb {
         // 从prev[level]节点往后查找合适的node
         int level = GetMaxHeight() - 1;
         //Node* x = prev[level];
+        // 分析两者的差别
         Node* x = head_;
 #ifdef CAL_ACCESS_COUNT
         uint64_t cnt = 0;
