@@ -184,7 +184,7 @@ int main(int argc, char **argv)
     }
     size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     skiplist_nvm = new rocksdb::PersistentSkiplistWrapper();
-    skiplist_nvm->Init(PATH, NVM_SIZE, 8, 2, KEY_SIZE,ops_num,per_1g_num);
+    skiplist_nvm->Init(PATH, NVM_SIZE, 20, 2, KEY_SIZE,ops_num,per_1g_num);
     
     CZL_PRINT("prepare to create PATH_LOG:%s", PATH_LOG);
     // KV write DRAM skiplist, and then background thread write it to NVM
