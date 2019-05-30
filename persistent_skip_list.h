@@ -78,6 +78,6 @@ class Persistent_SkipList {
 
         void FindLessThan(const std::string& key, Node** prev = nullptr);
 
-        void FindNextNode(const std::string &key, Node** prev);
+        void FindNextNode(const std::string &key, Node** prev, Statistic &stat);
     };
 }
