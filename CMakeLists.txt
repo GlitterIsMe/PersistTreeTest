@@ -24,7 +24,7 @@ set(src
         persistent_skiplist_no_transaction.cc
         persistent_skiplist_wrapper.cc
         random.cc
-        statistic.cc statistics_test.cc)
+        statistic.cc)
 
 
 include(FindThreads)

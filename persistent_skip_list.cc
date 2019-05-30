@@ -197,7 +197,7 @@ namespace rocksdb {
             max_height_ = static_cast<uint16_t>(height);
         }
         stats.end();
-        stats.add_read();
+        stats.add_search();
 
         stats.start();
         Node* x = NewNode(key, height);
