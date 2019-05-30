@@ -112,7 +112,7 @@ void write_to_nvm()
         auto number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
         string data(buf);
-        skiplist_nvm->Insert(data);
+        skiplist_nvm->Insert(data, stats);
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
             tmp_time = get_now_micros();

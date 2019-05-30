@@ -48,7 +48,7 @@ include_directories(/usr/local/include)
 #aux_source_directory(. src)
 
 add_executable(PersistTreeTest motivation1_main.cc ${src})
-#add_executable(StatsTest statistics_test.cc statistic.cc)
+add_executable(StatsTest statistics_test.cc statistic.cc)
 
 target_include_directories(PersistTreeTest PUBLIC ${LIBPMEM_INCLUDE_DIRS} . ..)
 target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
