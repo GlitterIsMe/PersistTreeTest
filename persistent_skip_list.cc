@@ -259,13 +259,13 @@ namespace rocksdb {
             num = (str[i] - '0') + 10 * num;
         }
         
-        for (int i = 8; i < 16; i++) {
+        for (int i = 8; i < 18; i++) {
             seq_num = (str[i] - '0') + 10 * seq_num;
         }
 
         bool res = ((last_num < num) || ((last_num == num) && (last_seq_num < seq_num)));
         if (!res) {
-            printf("----------------error: DRAM skiplist is not in order!!! -----------------------------\n\n\n\n");
+            printf("----------------error: DRAM skiplist is not in order!!! -----------------------------\n");
         }
 
         last_num = num;
