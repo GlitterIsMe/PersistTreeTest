@@ -7,7 +7,7 @@
 using std::array;
 
 const size_t slots_num = 1024;
-
+class Statistics;
 namespace rocksdb {
 
 class PersistentSkiplistWrapper {
@@ -16,7 +16,7 @@ class PersistentSkiplistWrapper {
 
         ~PersistentSkiplistWrapper();
 
-        void Insert(const std::string &key);
+        void Insert(const std::string &key, Statistics& stats);
 
         void Print();
 

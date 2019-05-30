@@ -6,6 +6,7 @@
 #include "random.h"
 #include "nvm_node.h"
 #include "persistent_skiplist_no_transaction.h"
+class Statistics;
 
 namespace rocksdb {
 
@@ -19,7 +20,7 @@ class Persistent_SkipList {
 #endif
         }
 
-        void Insert(const std::string& key);
+        void Insert(const std::string& key, Statistics& stats);
 
         void PrintKey(const char *str,uint64_t &last_num, uint64_t &last_seq_num) const;
 

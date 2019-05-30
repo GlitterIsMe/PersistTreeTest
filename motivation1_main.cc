@@ -8,6 +8,7 @@
 #include "random.h"
 #include "persistent_skiplist_wrapper.h"
 #include "log_batch_wrapper.h"
+#include "statistic.h"
 
 using namespace std;
 
@@ -106,7 +107,7 @@ void write_to_nvm()
     start_time = get_now_micros();
     last_tmp_time = start_time;
     size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
-
+    Statistic stats;
     for (uint64_t i = 1; i <= ops_num; i++) {
         auto number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
@@ -121,6 +122,8 @@ void write_to_nvm()
                     1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576,
                     1.0 * per_1g_num * 1e6 / tmp_use_time);
             last_tmp_time = tmp_time;
+            stats.print_latency();
+            stats.clear_period();
         }
 #endif
     }

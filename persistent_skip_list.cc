@@ -1,5 +1,5 @@
 #include "persistent_skip_list.h"
-
+#include "statistic.h"
 namespace rocksdb {
 
     // class Persistent_SkipList
@@ -126,7 +126,7 @@ namespace rocksdb {
 #endif
     }
 
-    void Persistent_SkipList::Insert(const std::string &key) {
+    void Persistent_SkipList::Insert(const std::string &key, Statistics& stats) {
         // key < prev[0]->next(0) && prev[0] is head or key > prev[0]
         //printf("prev[0] is %s\n", prev_[0]== nullptr?"null":"not null");
 #ifdef CAL_ACCESS_COUNT
@@ -176,7 +176,7 @@ namespace rocksdb {
             printf("key is equal\n");
             return;
         }*/
-
+        stats.start();
         if(!KeyIsAfterNode(key, prev_[0]->Next(0)) &&
             (prev_[0] == head_ || KeyIsAfterNode(key, prev_[0]))){
             for(size_t i = 1; i < prev_height_; i++){
@@ -196,7 +196,10 @@ namespace rocksdb {
             }
             max_height_ = static_cast<uint16_t>(height);
         }
+        stats.end();
+        stats.add_read();
 
+        stats.start();
         Node* x = NewNode(key, height);
         bool is_pmem = allocator_->is_pmem();
         for(int i = 0; i < height; i++){
@@ -215,6 +218,9 @@ namespace rocksdb {
         }else{
             pmem_msync(prev_[0], sizeof(Node*));
         }
+        stats.end();
+        stats.add_write();
+        stats.add_entries_num();
         prev_height_ = static_cast<uint16_t >(height);
     }
 
