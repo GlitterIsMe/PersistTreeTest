@@ -17,7 +17,7 @@ void Statistic::start(){
 }
 
 void Statistic::end() {
-    end_ = chrono::high_resolution_colock::now();
+    end_ = chrono::high_resolution_clock::now();
 }
 
 void Statistic::add_search() {
@@ -44,10 +44,11 @@ void Statistic::clear_period() {
 }
 
 void Statistic::print_latency() {
-    cout<<"num "<<num_
-    <<" period_read_latency "<<read_<<" ns"
-    <<" average_read_latency "<<read_ / num_<<" ns"
-    <<" period_write_latency "<<write_<<" ns"
-    <<" average_write_latency "<<write_ / num_<<" ns"
+    cout
+    <<"num "<<num_
+    <<" period_read_latency(ns) "<<read_
+    <<" average_read_latency(ns) "<<read_ / num_
+    <<" period_write_latency(ns) "<<write_
+    <<" average_write_latency(ns) "<<write_ / num_
     <<"\n";
 }
