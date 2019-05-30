@@ -11,6 +11,8 @@ Statistic::Statistic() {
     total_num_ = 0;
     total_read_ = 0.0;
     total_write_ = 0.0;
+
+    node_search_ = 0;
 }
 void Statistic::start(){
     start_ = chrono::high_resolution_clock::now();
@@ -41,6 +43,7 @@ void Statistic::clear_period() {
     read_ = 0.0;
     write_ = 0.0;
     num_ = 0;
+    node_search_ = 0;
 }
 
 void Statistic::print_latency() {
@@ -48,6 +51,7 @@ void Statistic::print_latency() {
     <<"num "<<num_
     <<" period_read_latency(ns) "<<read_
     <<" average_read_latency(ns) "<<read_ / num_
+    <<" average_node_search "<<node_search_ / num_
     <<" period_write_latency(ns) "<<write_
     <<" average_write_latency(ns) "<<write_ / num_
     <<"\n";

@@ -94,7 +94,7 @@ namespace rocksdb {
 #endif
     }
 
-    void Persistent_SkipList::FindNextNode(const std::string &key, Node** prev)
+    void Persistent_SkipList::FindNextNode(const std::string &key, Node** prev, Statistic &stats)
     {
         // 从prev[level]节点往后查找合适的node
         int level = GetMaxHeight() - 1;
@@ -107,9 +107,11 @@ namespace rocksdb {
 
         for (int i = level; i >= 0; i--) {
             Node* next = x->Next(i);
+            stats.add_node_search();
             while (next != nullptr && KeyIsAfterNode(key, next)) {
                 x = next;
                 next = x->Next(i);
+                stats.add_node_search();
 #ifdef CAL_ACCESS_COUNT
                 cnt++;
 #endif
@@ -181,12 +183,10 @@ namespace rocksdb {
             (prev_[0] == head_ || KeyIsAfterNode(key, prev_[0]))){
             for(size_t i = 1; i < prev_height_; i++){
                 prev_[i] = prev_[0];
-#ifdef CAL_ACCESS_COUNT
-                cnt_time_++;
-#endif
             }
+            stats.add_node_search();
         }else{
-            FindNextNode(key, prev_);
+            FindNextNode(key, prev_, stats);
         }
 
         int height = RandomHeight();

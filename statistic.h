@@ -31,6 +31,8 @@ public:
 
     void clear_period();
 
+    void add_node_search(){node_search_++;}
+
 private:
     double read_;
     double write_;
@@ -40,6 +42,8 @@ private:
     chrono::high_resolution_clock::time_point end_;
     uint64_t num_;
     uint64_t total_num_;
+
+    uint64_t node_search_;
 };
 
 #endif //PERSISTTREETEST_STATISTIC_H
