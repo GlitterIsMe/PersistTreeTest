@@ -12,7 +12,6 @@ int main(){
     std::this_thread::sleep_for(std::chrono::microseconds(100));
     stats.end();
     stats.add_search();
-    stats.add_entries_num();
 
     stats.start();
     std::this_thread::sleep_for(std::chrono::microseconds(200));

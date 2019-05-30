@@ -7,6 +7,7 @@
 Statistic::Statistic() {
     read_ = 0.0;
     write_ = 0.0;
+    num_ = 0;
     total_num_ = 0;
     total_read_ = 0.0;
     total_write_ = 0.0;
