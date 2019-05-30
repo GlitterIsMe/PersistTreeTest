@@ -4,42 +4,49 @@
 
 #include "statistic.h"
 
-void Statistic::start_search() {
-    start = chrono::high_resolution_clock::now();
+Statistic::Statistic() {
+    read_ = 0.0;
+    write_ = 0.0;
+    total_num_ = 0;
+    total_read_ = 0.0;
+    total_write_ = 0.0;
+}
+void Statistic::start(){
+    start_ = chrono::high_resolution_clock::now();
 }
 
 void Statistic::end() {
-    end = chrono::high_resolution_colock::now();
+    end_ = chrono::high_resolution_colock::now();
 }
 
 void Statistic::add_search() {
-    chrono::duration<double, std::nano> diff = end - start;
-    read += diff.count();
-    total_read += diff.count();
+    chrono::duration<double, std::nano> diff = end_ - start_;
+    read_ += diff.count();
+    total_read_ += diff.count();
 }
 
 void Statistic::add_write() {
-    chrono::duration<double, std::nano> diff = end - start;
-    write += diff.count();
-    total_write += diff.count();
+    chrono::duration<double, std::nano> diff = end_ - start_;
+    write_ += diff.count();
+    total_write_ += diff.count();
 }
 
 void Statistic::add_entries_num() {
-    num++;
-    total_num++;
+    num_++;
+    total_num_++;
 }
 
 void Statistic::clear_period() {
-    read = 0.0;
-    write = 0.0;
-    num = 0;
+    read_ = 0.0;
+    write_ = 0.0;
+    num_ = 0;
 }
 
 void Statistic::print_latency() {
-    cout<<"num "<<num
-    <<" period_read_latency "<<read<<" ns"
-    <<" average_read_latency "<<read / num<<" ns"
-    <<" period_write_latency "<<write<<" ns"
-    <<" average_write_latency "<<write / num<<" ns"
-    <<"\n"
+    cout<<"num "<<num_
+    <<" period_read_latency "<<read_<<" ns"
+    <<" average_read_latency "<<read_ / num_<<" ns"
+    <<" period_write_latency "<<write_<<" ns"
+    <<" average_write_latency "<<write_ / num_<<" ns"
+    <<"\n";
 }

@@ -14,7 +14,7 @@ using namespace std;
 
 class Statistic{
 public:
-    Statistic() = default;
+    Statistic();
     ~Statistic() = default;
 
     void start();
@@ -32,14 +32,14 @@ public:
     void clear_period();
 
 private:
-    double read;
-    double write;
-    double total_read;
-    double total_write;
-    chrono::time_point start;
-    chrono::time_point end;
-    uint64_t num;
-    uint64_t total_num;
+    double read_;
+    double write_;
+    double total_read_;
+    double total_write_;
+    chrono::high_resolution_clock::time_point start_;
+    chrono::high_resolution_clock::time_point end_;
+    uint64_t num_;
+    uint64_t total_num_;
 };
 
 #endif //PERSISTTREETEST_STATISTIC_H
