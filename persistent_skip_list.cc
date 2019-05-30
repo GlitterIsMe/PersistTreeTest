@@ -126,7 +126,7 @@ namespace rocksdb {
 #endif
     }
 
-    void Persistent_SkipList::Insert(const std::string &key, Statistics& stats) {
+    void Persistent_SkipList::Insert(const std::string &key, Statistic& stats) {
         // key < prev[0]->next(0) && prev[0] is head or key > prev[0]
         //printf("prev[0] is %s\n", prev_[0]== nullptr?"null":"not null");
 #ifdef CAL_ACCESS_COUNT

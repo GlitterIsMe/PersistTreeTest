@@ -1,5 +1,5 @@
 #include "flush_nvm.h"
-
+#include "statistic.h"
 namespace rocksdb {
     void FlushNVM::PrintKey(std::string &key, uint64_t &last_num, uint64_t &last_seq_num)
     {
@@ -37,12 +37,13 @@ namespace rocksdb {
         uint64_t last_num = 0;
         uint64_t last_seq_num = 0;
         assert(start != nullptr);
+        Statistic stats;
 
         while (start != nullptr) {
             std::string key = start->key_;     // here copy data process, maybe waste more time
             // insert to NVM skiplist
             PrintKey(key, last_num, last_seq_num);
-            skiplist_nvm_->Insert(key);
+            skiplist_nvm_->Insert(key, stats);
             start = start->Next(0);
         }
         // int level[20] = 0;
