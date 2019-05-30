@@ -188,6 +188,8 @@ namespace rocksdb {
         }else{
             FindNextNode(key, prev_, stats);
         }
+        stats.end();
+        stats.add_search();
 
         int height = RandomHeight();
         if(height > GetMaxHeight()){
@@ -196,8 +198,6 @@ namespace rocksdb {
             }
             max_height_ = static_cast<uint16_t>(height);
         }
-        stats.end();
-        stats.add_search();
 
         stats.start();
         Node* x = NewNode(key, height);
