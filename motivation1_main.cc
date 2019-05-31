@@ -156,7 +156,7 @@ void write_to_nvm(bool single = false) {
             stats.print_latency();
             stats.clear_period();
 
-            auto start_get = chrono::high_resolution_clock::now();
+            /*auto start_get = chrono::high_resolution_clock::now();
             do_get(ops_key);
             auto end_get = chrono::high_resolution_clock::now();
             chrono::duration<double, std::micro> get_diff = end_get - start_get;
@@ -165,7 +165,7 @@ void write_to_nvm(bool single = false) {
                 <<" time: "<<get_diff.count()<<" micros"
                 <<" iops: "<<GET_AFTER_INSERT / get_diff.count()<<" IOPS"
                 <<" avg_time_per_op: "<<get_diff.count() / GET_AFTER_INSERT<<"\n";
-            ops_key.clear();
+            ops_key.clear();*/
             // TODO: remove gettime from overall time calculation
         }
 #endif

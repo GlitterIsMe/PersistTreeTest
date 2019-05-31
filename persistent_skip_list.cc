@@ -218,7 +218,7 @@ namespace rocksdb {
         }
 
         bool res = ((last_num < num) || ((last_num == num) && (last_seq_num < seq_num)));
-        printf("%llu - %llu\n", num, seq_num);
+        //printf("%llu - %llu\n", num, seq_num);
         if (!res) {
             printf("----------------error: DRAM skiplist is not in order!!! -----------------------------\n");
         }
