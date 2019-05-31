@@ -224,17 +224,17 @@ namespace rocksdb {
         prev_height_ = static_cast<uint16_t >(height);
     }
 
-    std::optional<std::string> Persistent_SkipList::Get(const std::string &key) {
+    std::string Persistent_SkipList::Get(const std::string &key) {
         Node* grt_or_equal = FindGreaterOrEqual(key);
         if(Node != nullptr){
             int cmp = strncmp(grt_or_equal->key_, key.c_str(), key_size_);
             if(cmp == 0){
                 return std::string(grt_or_equal->key_, strlen(grt_or_equal));
             }else{
-                return {}
+                return string("")
             }
         }else{
-            return {}
+            return string("")
         }
     }
 

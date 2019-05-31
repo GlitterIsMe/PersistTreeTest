@@ -42,7 +42,7 @@ namespace rocksdb {
         skiplists_[slot]->Insert(key, stats);
     }
 
-    optoinal<string> PersistentSkiplistWrapper::Get(const std::string &key) {
+    string PersistentSkiplistWrapper::Get(const std::string &key) {
         size_t slot;
         if(slots_num == 1){
             slot = 0;
@@ -50,7 +50,7 @@ namespace rocksdb {
             uint64_t hash = CityHash64(key.c_str(), key_size_);
             slot = hash % slots_num;
         }
-        return skiplists_[slot]->Get(key, stats);
+        return skiplists_[slot]->Get(key);
     }
 
     void PersistentSkiplistWrapper::Print() {

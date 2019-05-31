@@ -107,7 +107,7 @@ void do_get(vector<string>& keys){
     auto rnd = rocksdb::Random::GetTLSInstance();
     size_t pos = rnd->Next() % keys.size();
     for(int i = 0; i < GET_AFTER_INSERT; i++){
-        skiplist_nvm->Get(keys[pos])
+        skiplist_nvm->Get(keys[pos]);
     }
 }
 
