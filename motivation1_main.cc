@@ -114,7 +114,7 @@ void do_get(vector<string>& keys){
 void write_to_nvm() {
     CZL_PRINT("start!");
     auto rnd = rocksdb::Random::GetTLSInstance();
-    char buf[KEY_SIZE];
+    char buf[buf_size];
     memset(buf, 0, sizeof(buf));
     string value(VALUE_SIZE, 'v');
     start_time = get_now_micros();
@@ -126,9 +126,9 @@ void write_to_nvm() {
     vector<string> ops_key;
     for (uint64_t i = 1; i <= ops_num; i++) {
         uint32_t number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%010d", number, i);
-        string key(buf);
-        string data = key + value;
+        snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
+        string data(buf);
+        string key(buf, 18);
         ops_key.push_back(std::move(key));
         skiplist_nvm->Insert(data, stats);
 #ifdef EVERY_1G_PRINT
@@ -166,7 +166,7 @@ void write_to_nvm() {
 #endif
     }
 #ifdef CAL_ACCESS_COUNT
-    skiplist_nvm->PrintAccessTime();
+    //skiplist_nvm->PrintAccessTime();
 #endif
     //skiplist_nvm->PrintLevelNum();
     skiplist_nvm->Print();
