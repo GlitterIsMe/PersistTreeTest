@@ -54,14 +54,14 @@ namespace rocksdb {
     }
 
     bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n, Statistic &stat) const {
-        if(n == nullptr) return false;
+        /*if(n == nullptr) return false;
         stat.start();
         int res = strncmp(n->key_, key.c_str(), key_size_);
         stat.end();
         stat.add_comp_lat();
         stat.add_comp_num();
-        return res < 0;
-        //return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
+        return res < 0;*/
+        return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
     }
 
     int Persistent_SkipList::CompareKeyAndNode(const std::string& key, Node* n) {

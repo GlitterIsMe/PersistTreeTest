@@ -40,6 +40,11 @@ public:
 
     void add_node_search(){node_search_++;}
 
+    void print_cur(){
+        chrono::duration<double, std::nano> diff = end_ - start_;
+        cout<<"total_time: "<<diff.count()<<"\n";
+    }
+
 private:
     double read_;
     double write_;

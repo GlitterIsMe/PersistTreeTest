@@ -33,7 +33,7 @@ PersistentSkiplistWrapper::Init(const std::string &path, uint64_t size, int32_t 
     key_size_ = key_size;
 }
 
-void PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stats) {
+size_t PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stats) {
     size_t slot;
     if (slots_num == 1) {
         slot = 0;
@@ -43,11 +43,13 @@ void PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stats)
     }
 
     skiplists_[slot]->Insert(key, stats);
+    return pos;
 }
 
-void PersistentSkiplistWrapper::Insert(const std::string &key, size_t which, Statistic &stats) {
+size_t PersistentSkiplistWrapper::Insert(const std::string &key, size_t which, Statistic &stats) {
     assert(which < slots_num);
     skiplists_[which]->Insert(key, stats);
+    return which;
 }
 
 string PersistentSkiplistWrapper::Get(const std::string &key) {
@@ -59,6 +61,10 @@ string PersistentSkiplistWrapper::Get(const std::string &key) {
         slot = hash % slots_num + 1;
     }
     return skiplists_[slot]->Get(key);
+}
+
+string PersistentSkiplistWrapper::Get(const std::string &key, size_t which) {
+    return skiplists_[which]->Get(key);
 }
 
 void PersistentSkiplistWrapper::Print() {

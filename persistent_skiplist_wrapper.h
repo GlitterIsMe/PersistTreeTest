@@ -17,11 +17,13 @@ class PersistentSkiplistWrapper {
 
         ~PersistentSkiplistWrapper();
 
-        void Insert(const std::string &key, Statistic& stats);
+        size_t Insert(const std::string &key, Statistic& stats);
 
-        void Insert(const std::string &key, size_t which, Statistic& stats);
+        size_t Insert(const std::string &key, size_t which, Statistic& stats);
 
         string Get(const std::string &key);
+
+        string Get(const std::string &key, size_t which);
 
         void Print();
 

@@ -26,7 +26,7 @@ const size_t NVM_SIZE = 150 * (1ULL << 30);             // 50GB
 //const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
 const size_t KEY_SIZE = 18;         // 16B
 
-const size_t GET_AFTER_INSERT = 1000;
+const size_t GET_AFTER_INSERT = 100000;
 
 // default parameter
 bool using_existing_data = false;
@@ -103,11 +103,20 @@ void write_to_dram() {
     skiplist_dram->Flush();     // write DRAM data to NVM.
 }
 
-void do_get(vector<string>& keys){
+void do_get(vector<vector<string>>& keys){
+    auto rnd = rocksdb::Random::GetTLSInstance();
+    size_t table_pos = rnd->Next() % keys.size();
+    size_t key_pos = rnd->Next() % keys[table_pos].size();
+    for(int i = 0; i < GET_AFTER_INSERT; i++){
+        skiplist_nvm->Get(keys[table_pos][key_pos]);
+    }
+}
+
+void do_get(vector<string>& keys, size_t which){
     auto rnd = rocksdb::Random::GetTLSInstance();
     size_t pos = rnd->Next() % keys.size();
     for(int i = 0; i < GET_AFTER_INSERT; i++){
-        skiplist_nvm->Get(keys[pos]);
+        skiplist_nvm->Get(keys[pos], which);
     }
 }
 
@@ -123,18 +132,20 @@ void write_to_nvm(bool single = false) {
     auto last_time = start;
     size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     Statistic stats;
-    vector<string> ops_key;
+    vector<vector<string>> ops_key;
+    ops_key.reserve(1025);
     for (uint64_t i = 1; i <= ops_num; i++) {
         uint32_t number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
         string data(buf);
         string key(buf, 18);
-        ops_key.push_back(std::move(key));
+        size_t pos;
         if(single){
-            skiplist_nvm->Insert(data, 0, stats);
+            pos = skiplist_nvm->Insert(data, 0, stats);
         }else{
-            skiplist_nvm->Insert(data, stats);
+            pos = skiplist_nvm->Insert(data, stats);
         }
+        ops_key[pos].push_back(std::move(key));
 
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
@@ -170,9 +181,28 @@ void write_to_nvm(bool single = false) {
         }
 #endif
     }
-#ifdef CAL_ACCESS_COUNT
-    //skiplist_nvm->PrintAccessTime();
-#endif
+
+    // get in a table which is one of 1024
+    stats.clear_period();
+    stats.start();
+    do_get(ops_key[0], 1);
+    stats.end();
+    stats.print_cur();
+    // get in a table which is 0
+    stats.clear_period();
+    stats.start();
+    do_get(ops_key[0], 0);
+    stats.end();
+    stats.print_cur();
+
+    // get in overall 1024 table
+
+    stats.clear_period();
+    stats.start();
+    do_get(ops_key);
+    stats.end();
+    stats.print_cur();
+
     //skiplist_nvm->PrintLevelNum();
     skiplist_nvm->Print();
     CZL_PRINT("end!");
