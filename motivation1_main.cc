@@ -245,11 +245,11 @@ int main(int argc, char **argv) {
 
         delete skiplist_dram;
     } else {
-        thread t(write_to_nvm, false);
-        t.join();
+        thread t1(write_to_nvm, false);
+        t1.join();
 
-        thread t(write_to_nvm, true);
-        t.join();
+        thread t2(write_to_nvm, true);
+        t2.join();
     }
 
     end_time = get_now_micros();
