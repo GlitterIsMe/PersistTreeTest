@@ -131,9 +131,9 @@ void write_to_nvm(bool single = false) {
         string key(buf, 18);
         ops_key.push_back(std::move(key));
         if(single){
-            skiplist_nvm->Insert(data, stats);
-        }else{
             skiplist_nvm->Insert(data, 0, stats);
+        }else{
+            skiplist_nvm->Insert(data, stats);
         }
 
 #ifdef EVERY_1G_PRINT

@@ -25,6 +25,13 @@ public:
 
     void add_write();
 
+    void add_comp_lat();
+
+    void add_comp_num(){
+        comp_num_++;
+        total_comp_num_++;
+    };
+
     void add_entries_num();
 
     void print_latency();
@@ -38,6 +45,12 @@ private:
     double write_;
     double total_read_;
     double total_write_;
+
+    double comp_lat_;
+    double total_comp_lat_;
+    uint64_t comp_num_;
+    uint64_t total_comp_num_;
+
     chrono::high_resolution_clock::time_point start_;
     chrono::high_resolution_clock::time_point end_;
     uint64_t num_;

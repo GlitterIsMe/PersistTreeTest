@@ -53,8 +53,15 @@ namespace rocksdb {
         return height;
     }
 
-    bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n) const {
-        return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
+    bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n, Statistic &stat) const {
+        if(n == nullptr) return false;
+        stat.start();
+        int res = strncmp(n->key_, key.c_str(), key_size_);
+        stat.end();
+        stat.add_comp_lat();
+        stat.add_comp_num();
+        return res < 0;
+        //return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
     }
 
     int Persistent_SkipList::CompareKeyAndNode(const std::string& key, Node* n) {
@@ -74,7 +81,8 @@ namespace rocksdb {
 
         for (int i = level; i >= 0; i--) {
             Node *next = x->Next(i);
-            while (next != nullptr && KeyIsAfterNode(key, next)) {
+            Statistic stat;
+            while (next != nullptr && KeyIsAfterNode(key, next, stat)) {
                 x = next;
                 next = x->Next(i);
 #ifdef CAL_ACCESS_COUNT
@@ -106,7 +114,7 @@ namespace rocksdb {
             // 后面就是查找的地方的next
             Node* next = x->Next(i);
             stats.add_node_search();
-            while (next != nullptr && KeyIsAfterNode(key, next)) {
+            while (next != nullptr && KeyIsAfterNode(key, next, stats)) {
                 x = next;
                 next = x->Next(i);
                 stats.add_node_search();

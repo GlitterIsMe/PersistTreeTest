@@ -72,7 +72,7 @@ class Persistent_SkipList {
             return strcmp(a, b) < 0;
         }
 
-        bool KeyIsAfterNode(const std::string& key, Node* n) const;
+        bool KeyIsAfterNode(const std::string& key, Node* n, Statistic &stat) const;
         
         int CompareKeyAndNode(const std::string& key, Node* n);
 

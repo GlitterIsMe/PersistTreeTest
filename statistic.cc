@@ -11,6 +11,10 @@ Statistic::Statistic() {
     total_num_ = 0;
     total_read_ = 0.0;
     total_write_ = 0.0;
+    comp_lat_ = 0.0;
+    total_comp_lat_ = 0.0;
+    comp_num_ = 0;
+    total_comp_num_ = 0;
 
     node_search_ = 0;
 }
@@ -26,15 +30,21 @@ void Statistic::add_search() {
     chrono::duration<double, std::nano> diff = end_ - start_;
     read_ += diff.count();
     total_read_ += diff.count();
-    if(num_ % 1000 == 0){
+    /*if(num_ % 1000 == 0){
         cout<<"search lat "<<diff.count()<<"\n";
-    }
+    }*/
 }
 
 void Statistic::add_write() {
     chrono::duration<double, std::nano> diff = end_ - start_;
     write_ += diff.count();
     total_write_ += diff.count();
+}
+
+void Statistic::add_comp_lat() {
+    chrono::duration<double, std::nano> diff = end_ - start_;
+    comp_lat_ += diff.count();
+    total_comp_lat_ += diff.count();
 }
 
 void Statistic::add_entries_num() {
@@ -47,6 +57,8 @@ void Statistic::clear_period() {
     write_ = 0.0;
     num_ = 0;
     node_search_ = 0;
+    comp_lat_ = 0.0;
+    comp_num_ = 0;
 }
 
 void Statistic::print_latency() {
@@ -57,5 +69,7 @@ void Statistic::print_latency() {
     <<" average_node_search "<<node_search_ / num_
     <<" period_write_latency(ns) "<<write_
     <<" average_write_latency(ns) "<<write_ / num_
+    <<" average_compare_latency(ns) "<<comp_lat_ / comp_num_
+    <<" total_compare_times"<<comp_num_
     <<"\n";
 }
