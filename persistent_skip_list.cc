@@ -100,86 +100,25 @@ namespace rocksdb {
         int level = GetMaxHeight() - 1;
         //Node* x = prev[level];
         Node *x = head_;
-#ifdef CAL_ACCESS_COUNT
-        uint64_t cnt = 0;
-        all_cnt_ += 1;
-#endif
 
         for (int i = level; i >= 0; i--) {
+            // next初始化为x的next，第一层为head
+            // 后面就是查找的地方的next
             Node* next = x->Next(i);
             stats.add_node_search();
             while (next != nullptr && KeyIsAfterNode(key, next)) {
                 x = next;
                 next = x->Next(i);
                 stats.add_node_search();
-#ifdef CAL_ACCESS_COUNT
-                cnt++;
-#endif
             }
             prev[i] = x;
         }
-#ifdef CAL_ACCESS_COUNT
-        cnt_time_ += cnt;
-        if(opt_1g_num_%per_1g_num_==0){
-            printf("every 1GB(%dGB): times: %.1f\n", (opt_1g_num_ / per_1g_num_), 1.0*cnt_time_/per_1g_num_);
-           // printf("every 64MB(%d/64MB): times: %.1f\n", (opt_1g_num_ / per_1g_num_), 1.0*cnt_time_/per_1g_num_);
-			cnt_time_ = 0;
-        }
-#endif
     }
 
     void Persistent_SkipList::Insert(const std::string &key, Statistic& stats) {
-        // key < prev[0]->next(0) && prev[0] is head or key > prev[0]
-        //printf("prev[0] is %s\n", prev_[0]== nullptr?"null":"not null");
-#ifdef CAL_ACCESS_COUNT
-        opt_1g_num_ ++;
-#endif
         // 比较待插入节点与prev[0]的关系
-/*        int res = CompareKeyAndNode(key, prev_[0]);
-// #ifdef CAL_ACCESS_COUNT
-//         const char *ckey = key.c_str();
-//         PrintKey(ckey);
-//         printf("res = %d,  prev_key=", (res > 0));
-//         PrintKey(prev_[0]->key_);
-//         printf("\n");
-// #endif
-        if (res > 0) {
-            // 大于prev0
-            // key is after prev_[0]
-            if (prev_[0]->Next(0) == nullptr) {
-                // prev的next为空，直接插入prev0后面
-#ifdef CAL_ACCESS_COUNT
-                suit_cnt_ += 1;
-#endif
-                ;
-            } else {
-                int res_next = CompareKeyAndNode(key, prev_[0]->Next(0));
-                if (res_next < 0) {     // 节点插入在prev_[0] 与 prev_[0]->Next(0)之间
-#ifdef CAL_ACCESS_COUNT
-                suit_cnt_ += 1;
-#endif
-                    ;
-                } else if (res_next > 0) {
-                    FindNextNode(key, prev_);
-                } else {
-                    printf("impossible key is equal!\n");
-                }
-            }
-#ifdef CAL_ACCESS_COUNT
-            cnt_time_++;
-#endif
-        } else if (res < 0) {
-            // 从头开始遍历查找
-            // 小于prev0
-            FindLessThan(key, prev_);
-        } else {
-            // 直接覆盖数据，不需要新建节点
-            ; // impossible
-            printf("key is equal\n");
-            return;
-        }*/
         stats.start();
-        if(!KeyIsAfterNode(key, prev_[0]->Next(0)) &&
+        /*if(!KeyIsAfterNode(key, prev_[0]->Next(0)) &&
             (prev_[0] == head_ || KeyIsAfterNode(key, prev_[0]))){
             for(size_t i = 1; i < prev_height_; i++){
                 prev_[i] = prev_[0];
@@ -187,7 +126,8 @@ namespace rocksdb {
             stats.add_node_search();
         }else{
             FindNextNode(key, prev_, stats);
-        }
+        }*/
+        FindNextNode(key, prev_, stats);
         stats.end();
         stats.add_search();
 
