@@ -104,18 +104,20 @@ void write_to_dram() {
 }
 
 void do_get(vector<vector<string>>& keys){
-    auto rnd = rocksdb::Random::GetTLSInstance();
-    size_t table_pos = rnd->Next() % keys.size();
-    size_t key_pos = rnd->Next() % keys[table_pos].size();
     for(int i = 0; i < GET_AFTER_INSERT; i++){
+        auto rnd = rocksdb::Random::GetTLSInstance();
+        size_t table_pos = rnd->Next() % keys.size();
+        cout<<"table size "<<keys.size()<<" table pos "<<table_pos<<"\n";
+        size_t key_pos = rnd->Next() % keys[table_pos].size();
+        cout<<"key size "<<keys[table_pos].size()<<" key pos "<<key_pos<<"\n";
         skiplist_nvm->Get(keys[table_pos][key_pos]);
     }
 }
 
 void do_get(vector<string>& keys, size_t which){
-    auto rnd = rocksdb::Random::GetTLSInstance();
-    size_t pos = rnd->Next() % keys.size();
     for(int i = 0; i < GET_AFTER_INSERT; i++){
+        auto rnd = rocksdb::Random::GetTLSInstance();
+        size_t pos = rnd->Next() % keys.size();
         skiplist_nvm->Get(keys[pos], which);
     }
 }
@@ -196,7 +198,7 @@ void write_to_nvm(bool single = false) {
         // get in a table which is one of 1024
         stats.clear_period();
         stats.start();
-        do_get(ops_key[0], 1);
+        do_get(ops_key[1], 1);
         stats.end();
         stats.print_cur();
 
