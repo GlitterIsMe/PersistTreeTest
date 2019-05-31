@@ -132,7 +132,7 @@ void write_to_nvm() {
 
         string data = key + value;
         skiplist_nvm->Insert(data, stats);
-//#ifdef EVERY_1G_PRINT
+#ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
             auto middle_time = chrono::high_resolution_clock::now();
             //tmp_time = get_now_micros();
@@ -164,7 +164,7 @@ void write_to_nvm() {
             ops_key.clear();
             // TODO: remove gettime from overall time calculation
         }
-//#endif
+#endif
     }
 #ifdef CAL_ACCESS_COUNT
     skiplist_nvm->PrintAccessTime();
