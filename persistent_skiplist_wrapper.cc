@@ -42,7 +42,7 @@ namespace rocksdb {
         skiplists_[slot]->Insert(key, stats);
     }
 
-    optoinal<string> PersistentSkiplistWrapper::Get(const std::string &key, Statistic &stats) {
+    optoinal<string> PersistentSkiplistWrapper::Get(const std::string &key) {
         size_t slot;
         if(slots_num == 1){
             slot = 0;

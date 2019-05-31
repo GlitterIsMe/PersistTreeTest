@@ -23,7 +23,7 @@ class Persistent_SkipList {
 
         void Insert(const std::string& key, Statistic& stats);
 
-        std::optional<std::string> Get(const std::string& key, Statistic& stats);
+        std::optional<std::string> Get(const std::string& key);
 
         void PrintKey(const char *str,uint64_t &last_num, uint64_t &last_seq_num) const;
 
