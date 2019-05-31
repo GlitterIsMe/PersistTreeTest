@@ -4,11 +4,9 @@
 #include "basic_define.h"
 #include "persistent_skip_list.h"
 #include <array>
-#include <optional>
 #include <string>
 using std::array;
-using std::optional;
-using std::string
+using std::string;
 const size_t slots_num = 1024;
 class Statistic;
 namespace rocksdb {

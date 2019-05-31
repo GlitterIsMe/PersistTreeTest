@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <string>
-#include <optional>
 #include "libpmem.h"
 #include "random.h"
 #include "nvm_node.h"
