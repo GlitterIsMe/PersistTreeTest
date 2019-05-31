@@ -19,6 +19,8 @@ class PersistentSkiplistWrapper {
 
         void Insert(const std::string &key, Statistic& stats);
 
+        void Insert(const std::string &key, size_t which, Statistic& stats);
+
         string Get(const std::string &key);
 
         void Print();

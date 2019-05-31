@@ -111,7 +111,7 @@ void do_get(vector<string>& keys){
     }
 }
 
-void write_to_nvm() {
+void write_to_nvm(bool single = false) {
     CZL_PRINT("start!");
     auto rnd = rocksdb::Random::GetTLSInstance();
     char buf[buf_size];
@@ -130,7 +130,12 @@ void write_to_nvm() {
         string data(buf);
         string key(buf, 18);
         ops_key.push_back(std::move(key));
-        skiplist_nvm->Insert(data, stats);
+        if(single){
+            skiplist_nvm->Insert(data, stats);
+        }else{
+            skiplist_nvm->Insert(data, 0, stats);
+        }
+
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
             auto middle_time = chrono::high_resolution_clock::now();
@@ -240,7 +245,10 @@ int main(int argc, char **argv) {
 
         delete skiplist_dram;
     } else {
-        thread t(write_to_nvm);
+        thread t(write_to_nvm, false);
+        t.join();
+
+        thread t(write_to_nvm, true);
         t.join();
     }
 
