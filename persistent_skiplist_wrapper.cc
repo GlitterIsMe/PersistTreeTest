@@ -43,7 +43,7 @@ size_t PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stat
     }
 
     skiplists_[slot]->Insert(key, stats);
-    return pos;
+    return slot;
 }
 
 size_t PersistentSkiplistWrapper::Insert(const std::string &key, size_t which, Statistic &stats) {

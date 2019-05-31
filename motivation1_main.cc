@@ -134,6 +134,9 @@ void write_to_nvm(bool single = false) {
     Statistic stats;
     vector<vector<string>> ops_key;
     ops_key.reserve(1025);
+    if(single){
+        ops_num /= 1024;
+    }
     for (uint64_t i = 1; i <= ops_num; i++) {
         uint32_t number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
