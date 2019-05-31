@@ -26,6 +26,9 @@ void Statistic::add_search() {
     chrono::duration<double, std::nano> diff = end_ - start_;
     read_ += diff.count();
     total_read_ += diff.count();
+    if(num_ % 1000 == 0){
+        cout<<"search lat "<<diff.count()<<"\n";
+    }
 }
 
 void Statistic::add_write() {

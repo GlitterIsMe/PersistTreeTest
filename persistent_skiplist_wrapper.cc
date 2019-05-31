@@ -39,7 +39,7 @@ void PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stats)
         slot = 0;
     } else {
         uint64_t hash = CityHash64(key.c_str(), key_size_);
-        slot = hash % slots_num;
+        slot = hash % (slots_num - 1) + 1;
     }
 
     skiplists_[slot]->Insert(key, stats);
