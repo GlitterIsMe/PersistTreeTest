@@ -70,6 +70,6 @@ void Statistic::print_latency() {
     <<" period_write_latency(ns) "<<write_
     <<" average_write_latency(ns) "<<write_ / num_
     <<" average_compare_latency(ns) "<<comp_lat_ / comp_num_
-    <<" total_compare_times"<<comp_num_
+    <<" average_compare_times "<<comp_num_ / num_
     <<"\n";
 }
