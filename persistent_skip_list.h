@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <string>
+#include <optional>
 #include "libpmem.h"
 #include "random.h"
 #include "nvm_node.h"
@@ -21,6 +22,8 @@ class Persistent_SkipList {
         }
 
         void Insert(const std::string& key, Statistic& stats);
+
+        std::optional<std::string> Get(const std::string& key, Statistic& stats);
 
         void PrintKey(const char *str,uint64_t &last_num, uint64_t &last_seq_num) const;
 

@@ -224,13 +224,27 @@ namespace rocksdb {
         prev_height_ = static_cast<uint16_t >(height);
     }
 
+    std::optional<std::string> Persistent_SkipList::Get(const std::string &key, Statistic& stats) {
+        Node* grt_or_equal = FindGreaterOrEqual(key);
+        if(Node != nullptr){
+            int cmp = strncmp(grt_or_equal->key_, key.c_str(), key_size_);
+            if(cmp == 0){
+                return std::string(grt_or_equal->key_, strlen(grt_or_equal));
+            }else{
+                return {}
+            }
+        }else{
+            return {}
+        }
+    }
+
     Node* Persistent_SkipList::FindGreaterOrEqual(const std::string &key) const {
         Node* x = head_;
         int level = GetMaxHeight() - 1;
         Node* last_bigger;
         while(true){
             Node* next = x->Next(level);
-            int cmp = (next == nullptr || next == last_bigger) ? 1 : strcmp(next->key_, key.c_str());
+            int cmp = (next == nullptr || next == last_bigger) ? 1 : strncmp(next->key_, key.c_str(), key_size_);
             if(cmp == 0 || (cmp > 0 && level ==0)){
                 return next;
             } else if(cmp < 0) {

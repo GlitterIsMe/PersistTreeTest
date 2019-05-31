@@ -4,8 +4,11 @@
 #include "basic_define.h"
 #include "persistent_skip_list.h"
 #include <array>
+#include <optional>
+#include <string>
 using std::array;
-
+using std::optional;
+using std::string
 const size_t slots_num = 1024;
 class Statistic;
 namespace rocksdb {
@@ -17,6 +20,8 @@ class PersistentSkiplistWrapper {
         ~PersistentSkiplistWrapper();
 
         void Insert(const std::string &key, Statistic& stats);
+
+        optoinal<string> Get(const std::string &key, Statistic& stats);
 
         void Print();
 
