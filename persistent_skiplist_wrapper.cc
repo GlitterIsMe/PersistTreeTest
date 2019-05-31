@@ -38,7 +38,7 @@ size_t PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stat
     if (slots_num == 1) {
         slot = 0;
     } else {
-        uint64_t hash = CityHash64(key.c_str(), key_size_);
+        uint64_t hash = CityHash64(key.c_tr(), key_size_);
         slot = hash % (slots_num - 1) + 1;
     }
 

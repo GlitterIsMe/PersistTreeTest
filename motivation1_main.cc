@@ -26,7 +26,7 @@ const size_t NVM_SIZE = 150 * (1ULL << 30);             // 50GB
 //const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
 const size_t KEY_SIZE = 18;         // 16B
 
-const size_t GET_AFTER_INSERT = 100000;
+const size_t GET_AFTER_INSERT = 2000;
 
 // default parameter
 bool using_existing_data = false;
@@ -185,26 +185,30 @@ void write_to_nvm(bool single = false) {
 #endif
     }
 
-    // get in a table which is one of 1024
-    stats.clear_period();
-    stats.start();
-    do_get(ops_key[0], 1);
-    stats.end();
-    stats.print_cur();
-    // get in a table which is 0
-    stats.clear_period();
-    stats.start();
-    do_get(ops_key[0], 0);
-    stats.end();
-    stats.print_cur();
+    if(single){
+        // get in a table which is 0
+        stats.clear_period();
+        stats.start();
+        do_get(ops_key[0], 0);
+        stats.end();
+        stats.print_cur();
+    }else{
+        // get in a table which is one of 1024
+        stats.clear_period();
+        stats.start();
+        do_get(ops_key[0], 1);
+        stats.end();
+        stats.print_cur();
 
-    // get in overall 1024 table
+        // get in overall 1024 table
+        stats.clear_period();
+        stats.start();
+        do_get(ops_key);
+        stats.end();
+        stats.print_cur();
+    }
 
-    stats.clear_period();
-    stats.start();
-    do_get(ops_key);
-    stats.end();
-    stats.print_cur();
+
 
     //skiplist_nvm->PrintLevelNum();
     skiplist_nvm->Print();
