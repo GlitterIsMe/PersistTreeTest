@@ -128,9 +128,8 @@ void write_to_nvm() {
         uint32_t number = rnd->Next() % ops_num;
         //snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
         string key = to_string(number) + to_string(ops_num);
-        ops_key.push_back(std::move(key));
-
         string data = key + value;
+        ops_key.push_back(std::move(key));
         skiplist_nvm->Insert(data, stats);
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
