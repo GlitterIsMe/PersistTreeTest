@@ -226,15 +226,15 @@ namespace rocksdb {
 
     std::string Persistent_SkipList::Get(const std::string &key) {
         Node* grt_or_equal = FindGreaterOrEqual(key);
-        if(Node != nullptr){
+        if(grt_or_equal != nullptr){
             int cmp = strncmp(grt_or_equal->key_, key.c_str(), key_size_);
             if(cmp == 0){
-                return std::string(grt_or_equal->key_, strlen(grt_or_equal));
+                return std::string(grt_or_equal->key_, strlen(grt_or_equal->key_));
             }else{
-                return string("")
+                return string("");
             }
         }else{
-            return string("")
+            return string("");
         }
     }
 
