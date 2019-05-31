@@ -7,7 +7,7 @@
 #include <string>
 using std::array;
 using std::string;
-const size_t slots_num = 1025;
+const size_t slots_num = 1024;
 class Statistic;
 namespace rocksdb {
 

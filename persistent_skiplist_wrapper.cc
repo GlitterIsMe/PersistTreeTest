@@ -26,8 +26,10 @@ PersistentSkiplistWrapper::~PersistentSkiplistWrapper() {
 void
 PersistentSkiplistWrapper::Init(const std::string &path, uint64_t size, int32_t max_height, int32_t branching_factor,
                                 size_t key_size, uint64_t opt_num, size_t per_1g_num) {
-    allocator_ = new PersistentAllocator(path, size);
+    //allocator_ = new PersistentAllocator(path, size);
+    size_t count = 0;
     for (auto &list : skiplists_) {
+        allocator_ = new PersistentAllocator(path + to_string(++count), size / slots_num);
         list = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num, per_1g_num);
     }
     key_size_ = key_size;

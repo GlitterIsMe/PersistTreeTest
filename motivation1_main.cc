@@ -134,11 +134,11 @@ void write_to_nvm(bool single = false) {
     auto last_time = start;
     size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     Statistic stats;
-    vector<vector<string>> ops_key;
+    /*vector<vector<string>> ops_key;
     ops_key.reserve(1025);
     if(single){
         ops_num /= 1024;
-    }
+    }*/
     for (uint64_t i = 1; i <= ops_num; i++) {
         uint32_t number = rnd->Next() % ops_num;
         snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
@@ -150,7 +150,7 @@ void write_to_nvm(bool single = false) {
         }else{
             pos = skiplist_nvm->Insert(data, stats);
         }
-        ops_key[pos].push_back(std::move(key));
+        //ops_key[pos].push_back(std::move(key));
 
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
@@ -186,7 +186,7 @@ void write_to_nvm(bool single = false) {
         }
 #endif
     }
-
+/*
     if(single){
         // get in a table which is 0
         stats.clear_period();
@@ -208,7 +208,7 @@ void write_to_nvm(bool single = false) {
         do_get(ops_key);
         stats.end();
         stats.print_cur();
-    }
+    }*/
 
 
 
@@ -287,8 +287,8 @@ int main(int argc, char **argv) {
         thread t1(write_to_nvm, false);
         t1.join();
 
-        thread t2(write_to_nvm, true);
-        t2.join();
+        /*thread t2(write_to_nvm, true);
+        t2.join();*/
     }
 
     end_time = get_now_micros();
