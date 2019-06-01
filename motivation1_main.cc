@@ -132,7 +132,7 @@ void write_to_nvm(bool single = false) {
     auto start = chrono::high_resolution_clock::now();
     //last_tmp_time = start_time;
     auto last_time = start;
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
+    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
     Statistic stats;
     /*vector<vector<string>*> ops_key;
     for(size_t i = 0; i < 1024; i++){
@@ -157,12 +157,12 @@ void write_to_nvm(bool single = false) {
             //tmp_time = get_now_micros();
             //tmp_use_time = tmp_time - last_tmp_time;
             chrono::duration<double, std::micro> diff = middle_time - last_time;
-            /*printf("every 64MBB(%dnd 64MB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
+            /*printf("every 1GB(%dnd GB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
                    (i / per_1g_num), 1.0 * diff.count() * 1e-6,
                    1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / diff.count() / 1048576,
                    1.0 * per_1g_num * 1e6 / diff.count());*/
             cout<<fixed<<setprecision(4)
-                <<"every_64MB("<<i / per_1g_num<<"th):"
+                <<"every_1GB("<<i / per_1g_num<<"th):"
                 <<" time: "<<diff.count() * 1e-6<<" s,"
                 <<" throughput: "<<(KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / diff.count() / 1048576<<" MB/s,"
                 <<" IOPS: "<<per_1g_num * 1e6 / diff.count()<<" IOPS\n";
