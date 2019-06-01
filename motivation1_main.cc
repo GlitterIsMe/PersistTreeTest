@@ -21,7 +21,7 @@ using namespace std;
 
 #define PATH_LOG "/home/czl/pmem0/skiplist_test_dir/dram_skiplist"
 
-const size_t NVM_SIZE = 150 * (1ULL << 30);             // 50GB
+const size_t NVM_SIZE = 200 * (1ULL << 30);             // 200GB
 //const size_t NVM_SIZE = 133175443456;             // 50GB
 //const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
 const size_t KEY_SIZE = 18;         // 16B
