@@ -60,7 +60,7 @@ string PersistentSkiplistWrapper::Get(const std::string &key) {
         slot = 0;
     } else {
         uint64_t hash = CityHash64(key.c_str(), key_size_);
-        slot = hash % slots_num + 1;
+        slot = hash % slots_num;
     }
     return skiplists_[slot]->Get(key);
 }
