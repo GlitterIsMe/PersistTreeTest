@@ -104,6 +104,7 @@ void write_to_dram() {
 }
 
 void do_get(vector<vector<string>>& keys){
+    cout<<keys.size()<<endl;
     for(int i = 0; i < GET_AFTER_INSERT; i++){
         auto rnd = rocksdb::Random::GetTLSInstance();
         size_t table_pos = rnd->Next() % keys.size();
@@ -134,9 +135,9 @@ void write_to_nvm(bool single = false) {
     auto last_time = start;
     size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
     Statistic stats;
-    /*vector<vector<string>> ops_key;
+    vector<vector<string>> ops_key;
     ops_key.reserve(1025);
-    if(single){
+    /*if(single){
         ops_num /= 1024;
     }*/
     for (uint64_t i = 1; i <= ops_num; i++) {
@@ -150,7 +151,7 @@ void write_to_nvm(bool single = false) {
         }else{
             pos = skiplist_nvm->Insert(data, stats);
         }
-        //ops_key[pos].push_back(std::move(key));
+        ops_key[pos].push_back(std::move(key));
 
 #ifdef EVERY_1G_PRINT
         if ((i % per_1g_num) == 0) {
@@ -186,7 +187,7 @@ void write_to_nvm(bool single = false) {
         }
 #endif
     }
-/*
+
     if(single){
         // get in a table which is 0
         stats.clear_period();
@@ -198,7 +199,7 @@ void write_to_nvm(bool single = false) {
         // get in a table which is one of 1024
         stats.clear_period();
         stats.start();
-        do_get(ops_key[1], 1);
+        do_get(ops_key[0], 0);
         stats.end();
         stats.print_cur();
 
@@ -208,7 +209,7 @@ void write_to_nvm(bool single = false) {
         do_get(ops_key);
         stats.end();
         stats.print_cur();
-    }*/
+    }
 
 
 
