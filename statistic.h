@@ -42,7 +42,7 @@ public:
 
     void print_cur(){
         chrono::duration<double, std::nano> diff = end_ - start_;
-        cout<<"total_time: "<<diff.count()<<"\n";
+        cout<<"total_time: "<<diff.count() * 1e-6<<"s\n";
     }
 
 private:
