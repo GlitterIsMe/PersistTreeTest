@@ -63,13 +63,13 @@ void Statistic::clear_period() {
 
 void Statistic::print_latency() {
     cout
-    <<"num "<<num_
-    <<" period_read_latency(ns) "<<read_
+    //<<"num "<<num_
+    //<<" period_read_latency(ns) "<<read_
     <<" average_read_latency(ns) "<<read_ / num_
     <<" average_node_search "<<node_search_ / num_
-    <<" period_write_latency(ns) "<<write_
+    //<<" period_write_latency(ns) "<<write_
     <<" average_write_latency(ns) "<<write_ / num_
-    <<" average_compare_latency(ns) "<<comp_lat_ / comp_num_
-    <<" average_compare_times "<<comp_num_ / num_
+    //<<" average_compare_latency(ns) "<<comp_lat_ / comp_num_
+    //<<" average_compare_times "<<comp_num_ / num_
     <<"\n";
 }
