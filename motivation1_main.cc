@@ -138,7 +138,7 @@ public:
             end_ = chrono::high_resolution_clock::now();
 
             dram_not_flush_print();
-            skiplist_dram->Flush(tpool);     // write DRAM data to NVM.
+            skiplist_dram->Flush();     // write DRAM data to NVM.
             end_ = chrono::high_resolution_clock::now();
         } else {
             write_to_nvm();
