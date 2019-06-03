@@ -19,11 +19,11 @@ namespace rocksdb {
 
     class SkiplistWriteNVM {
 	public:
-        SkiplistWriteNVM();
+        SkiplistWriteNVM(ThreadPool* tpool_);
 
         ~SkiplistWriteNVM();
 
-        void Flush(ThreadPool* tpool);
+        void Flush();
 
         void Insert(const std::string &key);
 
@@ -63,5 +63,7 @@ namespace rocksdb {
         size_t key_size_;
         std::string path_;
         uint32_t skiplist_seq_number_;      // initialize to zero, every skiplist flush to nvm, skiplist_seq_number_ += 1;
+
+        ThreadPool* tpool;
 	};
 }

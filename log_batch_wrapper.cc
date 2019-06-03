@@ -5,10 +5,11 @@ namespace rocksdb {
     size_t SkiplistWriteNVM::skiplist_max_num_ = 1;
     size_t SkiplistWriteNVM::block_skiplist_num_ = 0;
 
-	SkiplistWriteNVM::SkiplistWriteNVM(): been_inited_(false),
+	SkiplistWriteNVM::SkiplistWriteNVM(ThreadPool *tpool_): been_inited_(false),
 		max_mem_skiplist_size_(k64MB), cur_mem_skiplist_size_(0){
         skiplist_ = nullptr;
 		is_full_.store(false, std::memory_order_relaxed);
+		tpool = tpool;
 
 #ifndef DRAM_CANCEL_LOG
         allocator_ = nullptr;
@@ -118,7 +119,7 @@ namespace rocksdb {
         //CZL_PRINT("call thread end!");
     }
 
-    void SkiplistWriteNVM::Flush(ThreadPool* tpool) {
+    void SkiplistWriteNVM::Flush() {
        // CZL_PRINT("begin to flush! block_skiplist_num_=%u, max_skiplist_num=%u", block_skiplist_num_, skiplist_max_num_);
         q_mutex_.lock();		// lock it, keep it thread safety.
 

@@ -112,7 +112,7 @@ public:
         // KV write DRAM skiplist, and then background thread write it to NVM
         if (!config.nvm_direct_) {
             tpool = new ThreadPool(2);          // create threadpool(thread number = 2)
-            skiplist_dram = new rocksdb::SkiplistWriteNVM();
+            skiplist_dram = new rocksdb::SkiplistWriteNVM(tpool);
             skiplist_dram->Init(
                     config.log_path_,
                     skiplist_nvm,
