@@ -9,7 +9,7 @@
 #include "libpmem.h"
 #include "random.h"
 #include "nvm_node.h"
-#include "error.h"
+
 using std::exception;
 namespace rocksdb {
 
