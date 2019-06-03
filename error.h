@@ -10,24 +10,28 @@ using std::exception;
 
 namespace rocksdb {
 class AllocatorException : public exception {
+public:
     const char *what() const noexcept {
         return "Allocator Exception";
     }
 };
 
 class AllocatorMapFailed : public AllocatorException {
+public:
     const char *what() const noexcept {
         return "NVM file mapped failed";
     }
 };
 
 class AllocatorNotPM : public AllocatorException {
+public:
     const char *what() const noexcept {
         return "Using addr not a persistent memory";
     }
 };
 
 class AllocatorSpaceRunOut : public AllocatorException {
+public:
     const char *what() const noexcept {
         return "NVM space has run out";
     }
