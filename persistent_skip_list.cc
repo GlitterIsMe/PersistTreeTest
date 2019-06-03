@@ -2,7 +2,7 @@
 #include "persistent_skip_list.h"
 #include "statistic.h"
 #include "error.h"
-using cout;
+using std::cout;
 namespace rocksdb {
 
     // class Persistent_SkipList
