@@ -108,7 +108,7 @@ public:
         skiplist_nvm = new rocksdb::PersistentSkiplistWrapper();
         skiplist_nvm->Init(config.path_, config.nvm_size_, 20, 2, config.key_size_, config.ops_num_, output_interval);
 
-        CZL_PRINT("prepare to create PATH_LOG:%s", PATH_LOG);
+        CZL_PRINT("prepare to create PATH_LOG:%s", NVM_LOG_PATH.c_str());
         // KV write DRAM skiplist, and then background thread write it to NVM
         if (!config.nvm_direct_) {
             tpool = new ThreadPool(2);          // create threadpool(thread number = 2)
@@ -138,7 +138,7 @@ public:
             end_ = chrono::high_resolution_clock::now();
 
             dram_not_flush_print();
-            skiplist_dram->Flush();     // write DRAM data to NVM.
+            skiplist_dram->Flush(tpool);     // write DRAM data to NVM.
             end_ = chrono::high_resolution_clock::now();
         } else {
             write_to_nvm();
@@ -253,7 +253,7 @@ private:
                 chrono::duration<double, std::micro> diff = middle_time - last_time;
                 cout<<"every 1GB ("<<i / output_interval<<"GB):"
                     <<" time: "<< 1.0 * diff.count() * 1e-6<<" s,"
-                    <<" speed: "<<1.0 * entry_size * output_interval * 1e6 / diff.count() / 1048576<<" MB/s,"
+                    <<" speed: "<<1.0 * (config.key_size_ + config.value_size_) * output_interval * 1e6 / diff.count() / 1048576<<" MB/s,"
                     <<" IOPS: "<<1.0 * output_interval * 1e6 / diff.count()<<" IOPS\n";
                 last_time = middle_time;
             }
@@ -356,11 +356,15 @@ int main(int argc, char **argv) {
     int mem_skiplist_size = atoi(argv[6]);
     int skiplist_max_num = atoi(argv[7]);
 
-    CZL_PRINT("buf_size:%u", buf_size);
-    CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
-    CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, value_size);
-    CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
-    CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
+    time_t now = time(0);
+    char* dt = ctime(&now);
+    cout<<"Time: "<<dt<<"\n";
+    cout<<"Using Existing Data: "<<using_existing_data<<" (0:no, 1:yes)\n";
+    cout<<"Write To NVM Directly: "<<nvm_direct<<"\n";
+    cout<<"Key Size: "<<18<<" Bytes\nValue Size: "<<value_size<<" Bytes\n";
+    cout<<"OpsNum: "<<ops_num<<"("<<ops_num * value_size / 1048576.0<<")MB estimated\n";
+    cout<<"Size of Memtable in Memory: "<<mem_skiplist_size<<" MB\n";
+    cout<<"Max Skiplist Num: "<<skiplist_max_num<<"\n";
 
     //assert((test_type >> 1) == 0);
     assert((value_size & (value_size - 1)) == 0);
