@@ -7,11 +7,6 @@ set(CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-lpmem -pg")
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -lpmem)
 
-#set(ENV{CZL_DEBUG})
-#set(ENV{ENERY_1G_PRINT})
-#set(ENV{DRAM_CANCLE_LOG})
-#set(ENV{CAL_ACCESS_COUNT})
-
 add_definitions(-DCZL_DEBUG)
 add_definitions(-DEVERY_1G_PRINT)
 add_definitions(-DDRAM_CANCLE_LOG)
@@ -25,7 +20,7 @@ set(src
         persistent_skiplist_wrapper.cc
         random.cc
         statistic.cc
-        persistent_allocator.cc error.h)
+        persistent_allocator.cc)
 
 
 include(FindThreads)
@@ -39,22 +34,12 @@ else()
     find_package(LIBPMEMOBJ++ REQUIRED)
 endif()
 
-link_directories(${LIBPMEM_LIBRARY_DIRS})
-link_directories(${LIBPMEMOBJ++_LIBRARY_DIRS})
-link_directories(/usr/local/lib)
+link_directories(${LIBPMEM_LIBRARY_DIRS} ${LIBPMEMOBJ++_LIBRARY_DIRS} /usr/local/lib)
 
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(/usr/local/include)
-
-#aux_source_directory(. src)
+include_directories(${PROJECT_SOURCE_DIR} /usr/local/include)
 
 add_executable(PersistTreeTest motivation1_main.cc ${src})
 add_executable(StatsTest statistics_test.cc statistic.cc)
 
-target_include_directories(PersistTreeTest PUBLIC ${LIBPMEM_INCLUDE_DIRS} . ..)
-target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-target_include_directories(PersistTreeTest PUBLIC ${LIBPMEMOBJ++_INCLUDE_DIRS} . ..)
-target_link_libraries(PersistTreeTest ${LIBPMEMOBJ++_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-target_link_libraries(PersistTreeTest cityhash)
+target_include_directories(PersistTreeTest PUBLIC ${LIBPMEM_INCLUDE_DIRS} ${LIBPMEMOBJ++_INCLUDE_DIRS} . ..)
+target_link_libraries(PersistTreeTest ${LIBPMEM_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} cityhash)

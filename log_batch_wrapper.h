@@ -23,13 +23,13 @@ namespace rocksdb {
 
         ~SkiplistWriteNVM();
 
-        void Flush();
+        void Flush(ThreadPool* tpool);
 
         void Insert(const std::string &key);
 
         void Put_log(const char *key, size_t size);
 
-        void Get_log();
+        //void Get_log();
 
 		void Realloc();
 

@@ -154,35 +154,6 @@ public:
     }
 
 private:
-
-    // parse input parameter: ok return 0, else return -1;
-    int parse_input(int num, char **para) {
-        CZL_PRINT("num=%d", num);
-        if (num != 8) {
-            cout << "input parameter nums incorrect! " << num << endl;
-            return -1;
-        }
-
-        int using_existing_data = atoi(para[1]);
-        int test_type = atoi(para[2]);
-        int value_size = atoi(para[3]);
-        int ops_type = atoi(para[4]);
-        int ops_num = atoi(para[5]);
-        int mem_skiplist_size = atoi(para[6]);
-        int skiplist_max_num = atoi(para[7]);
-
-        CZL_PRINT("buf_size:%u", buf_size);
-        CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
-        CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, VALUE_SIZE);
-        CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
-        CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
-
-        assert((test_type >> 1) == 0);
-        assert((value_size & (value_size - 1)) == 0);
-        assert(skiplist_max_num >= 1 && skiplist_max_num <= 20);
-        return 0;
-    }
-
     void write_to_nvm(bool single = false) {
         CZL_PRINT("start!");
         auto rnd = rocksdb::Random::GetTLSInstance();

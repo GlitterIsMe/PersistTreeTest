@@ -118,7 +118,7 @@ namespace rocksdb {
         //CZL_PRINT("call thread end!");
     }
 
-    void SkiplistWriteNVM::Flush() {
+    void SkiplistWriteNVM::Flush(ThreadPool* tpool) {
        // CZL_PRINT("begin to flush! block_skiplist_num_=%u, max_skiplist_num=%u", block_skiplist_num_, skiplist_max_num_);
         q_mutex_.lock();		// lock it, keep it thread safety.
 
