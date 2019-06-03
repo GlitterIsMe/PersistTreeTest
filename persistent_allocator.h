@@ -5,10 +5,12 @@
 
 #include <cstring>
 #include <string>
+#include <exception>
 #include "libpmem.h"
 #include "random.h"
 #include "nvm_node.h"
-
+#include "error.h"
+using std::exception;
 namespace rocksdb {
 
 class PersistentAllocator {

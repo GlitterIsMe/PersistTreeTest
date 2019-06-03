@@ -1,5 +1,8 @@
+#include <iostream>
 #include "persistent_skip_list.h"
 #include "statistic.h"
+#include "error.h"
+using cout;
 namespace rocksdb {
 
     // class Persistent_SkipList
@@ -21,27 +24,37 @@ namespace rocksdb {
         opt_1g_num_ = 0;
         per_1g_num_ = per_1g_num;
 #endif
-        prev_ = reinterpret_cast<Node**>(allocator_->Allocate(sizeof(Node*) * kMaxHeight_));
-        for (int i = 0; i < kMaxHeight_; i++) {
-            head_->SetNext(i, nullptr);
-            prev_[i] = head_;
-            pmem_flush(prev_ + i, sizeof(Node*));
+        try {
+            prev_ = reinterpret_cast<Node**>(allocator_->Allocate(sizeof(Node*) * kMaxHeight_));
+            for (int i = 0; i < kMaxHeight_; i++) {
+                head_->SetNext(i, nullptr);
+                prev_[i] = head_;
+                pmem_flush(prev_ + i, sizeof(Node*));
+            }
+            pmem_drain();
+            prev_height_ = 1;
+        }catch (AllocatorSpaceRunOut& e){
+            cout<<"NVM space is running out"<<"\n";
+            exit(-1);
         }
-        pmem_drain();
-        prev_height_ = 1;
     }
 
     Node* Persistent_SkipList::NewNode(const std::string &key, int height) {
         bool is_pmem = allocator_->is_pmem();
-        char* mem = allocator_->Allocate(sizeof(Node) + sizeof(Node*) * (height - 1));
-        char* pkey = allocator_->Allocate(key.size());
-        if(is_pmem){
-            pmem_memcpy_persist(pkey, key.c_str(), key.size());
-        }else{
-            memcpy(pkey, key.c_str(), key.size());
-            pmem_msync(pkey, key.size());
+        try {
+            char* mem = allocator_->Allocate(sizeof(Node) + sizeof(Node*) * (height - 1));
+            char* pkey = allocator_->Allocate(key.size());
+            if(is_pmem){
+                pmem_memcpy_persist(pkey, key.c_str(), key.size());
+            }else{
+                memcpy(pkey, key.c_str(), key.size());
+                pmem_msync(pkey, key.size());
+            }
+            return new (mem) Node(pkey);
+        }catch (AllocatorSpaceRunOut& e){
+            cout<<"NVM space is running out"<<"\n";
+            exit(-1);
         }
-        return new (mem) Node(pkey);
     }
 
     int Persistent_SkipList::RandomHeight() {
@@ -54,13 +67,6 @@ namespace rocksdb {
     }
 
     bool Persistent_SkipList::KeyIsAfterNode(const std::string& key, Node* n, Statistic &stat) const {
-        /*if(n == nullptr) return false;
-        stat.start();
-        int res = strncmp(n->key_, key.c_str(), key_size_);
-        stat.end();
-        stat.add_comp_lat();
-        stat.add_comp_num();
-        return res < 0;*/
         return (n != nullptr) && (strncmp(n->key_, key.c_str(), key_size_) < 0);
     }
 

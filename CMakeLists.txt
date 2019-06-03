@@ -22,10 +22,10 @@ set(src
         log_batch.cc
         log_batch_wrapper.cc
         persistent_skip_list.cc
-        persistent_skiplist_no_transaction.cc
         persistent_skiplist_wrapper.cc
         random.cc
-        statistic.cc persistent_allocator.cc persistent_allocator.h)
+        statistic.cc
+        persistent_allocator.cc error.h)
 
 
 include(FindThreads)

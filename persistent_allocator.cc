@@ -1,25 +1,21 @@
 //
 // Created by 张艺文 on 19.6.3.
 //
-
 #include "persistent_allocator.h"
 
 namespace rocksdb {
 
-PersistentAllocator::PersistentAllocator(const std::string path, uint64_t size) {
+PersistentAllocator::PersistentAllocator(const std::string path, uint64_t size){
     //pmemaddr_ = static_cast<char *>(pmem_map_file(path.c_str(), size, PMEM_FILE_CREATE | PMEM_FILE_EXCL, 0666, &mapped_len_, &is_pmem_));
     //printf("map file at %s\n", path.c_str());
     pmemaddr_ = static_cast<char *>(pmem_map_file(path.c_str(), size, PMEM_FILE_CREATE, 0666, &mapped_len_, &is_pmem_));
 
     if (pmemaddr_ == NULL) {
-        printf("PersistentAllocator: map error\n");
-        exit(-1);
+        throw MapFailed;
     }
-    /*if(is_pmem_){
-        printf("is pmem\n");
-    }else{
-        printf("is not pmem\n");
-    }*/
+    if(!is_pmem_){
+        throw NotPM
+    }
     capacity_ = size;
     cur_index_ = pmemaddr_;
 }
@@ -28,7 +24,10 @@ PersistentAllocator::~PersistentAllocator() {
     pmem_unmap(pmemaddr_, mapped_len_);
 }
 
-char* PersistentAllocator::Allocate(size_t bytes) {
+char* PersistentAllocator::Allocate(size_t bytes){
+    if(cur_index_ + bytes > mapped_len_){
+        throw SpaceRunOut;
+    }
     char *result = cur_index_;
     cur_index_ += bytes;
     return result;

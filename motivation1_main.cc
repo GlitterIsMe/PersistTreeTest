@@ -12,243 +12,352 @@
 #include "persistent_skiplist_wrapper.h"
 #include "log_batch_wrapper.h"
 #include "statistic.h"
+#include "thread_pool.h"
 
 using namespace std;
 
-#define PATH "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist2"
-
-//#define PATH "/dev/dax1.0"
-
-#define PATH_LOG "/home/czl/pmem0/skiplist_test_dir/dram_skiplist"
-
+const string NVM_PATH = "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist2";
+const string NVM_LOG_PATH = "/home/czl/pmem0/skiplist_test_dir/dram_skiplist";
 const size_t NVM_SIZE = 200 * (1ULL << 30);             // 200GB
-//const size_t NVM_SIZE = 133175443456;             // 50GB
-//const size_t NVM_LOG_SIZE = 42 * (1ULL << 30);         // 42GB
-const size_t KEY_SIZE = 18;         // 16B
 
-const size_t GET_AFTER_INSERT = 2000;
+enum EngineType {
+    SKIPLIST,
+    BTREE,
+    BPLUSTREE,
+    DEFAULT,
+};
 
-// default parameter
-bool using_existing_data = false;
-size_t test_type = 0;
-size_t VALUE_SIZE = 4096;
-bool ops_type = true;
-uint64_t ops_num = 1000000;
-size_t mem_skiplist_size = 64;       // default: 64MB
-size_t skiplist_max_num = 1;
+struct Config {
+    /* parameter:
+ *    @using_existing_data: whether using old data or not(read operations must rely on existing data on NVM)
+ *    @test_type(0: write NVM directly, 1: write DRAM and thread flush data to NVM)
+ *    @value_size
+ *    @ops_type: Read=0, Write=1
+ *    @ops_num: data_size = @value_size * @ops_num
+ *    @mem_skiplist_size: limit skiplist size(MB) in DRAM. It also used to initilize DRAM skiplist
+ *    @skiplist_max_num: allow maximum number skiplist not dealt by background thread.
+ *    @storage_type: 0:skiplist, 1:B-Tree, 2:B+ Tree        // To Be Done
+ */
+    const string path_;
+    const string log_path_;
+    const uint64_t nvm_size_;
 
-size_t buf_size;        // initilized in parse_input()
+    const size_t key_size_;
+    const size_t value_size_;
+    const uint64_t ops_num_;
+    const uint64_t get_after_insert_;
 
-rocksdb::SkiplistWriteNVM *skiplist_dram;
+    // by MB
+    const size_t mem_skiplist_size_;
+    const size_t skiplist_max_num_;
 
-uint64_t start_time, end_time, use_time, last_tmp_time, tmp_time, tmp_use_time;
+    const bool using_existing_data_;
+    const bool nvm_direct_;
+    const EngineType enging_;
 
-void dram_print() {
-    printf("-------------   write to dram  start: ----------------------\n");
-    printf("key: %uB, value: %uB, number: %llu, mem_skiplist_size: %u\n", KEY_SIZE, VALUE_SIZE, ops_num,
-           mem_skiplist_size);
-    printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", 1.0 * use_time * 1e-6,
-           1.0 * (KEY_SIZE + VALUE_SIZE) * ops_num * 1e6 / use_time / 1048576, 1.0 * ops_num * 1e6 / use_time);
-    printf("-------------   write to dram   end: ------------------------\n");
-}
+    Config(string path_dir) :
+            path_(path_dir),
+            log_path_(path_dir),
+            nvm_size_(1ul * 1024 * 1024 * 1024),
+            key_size_(16),
+            value_size_(1024),
+            ops_num_(1000),
+            get_after_insert_(0),
+            mem_skiplist_size_(64ul * 1024 * 1024),
+            skiplist_max_num_(1),
+            using_existing_data_(false),
+            nvm_direct_(false),
+            enging_(DEFAULT) {}
 
-void dram_not_flush_print() {
-    uint64_t tmp1 = get_now_micros();
-    uint64_t tmp2 = tmp1 - start_time;
-    printf("-------------   write to dram  not flush  --- start: ----------------------\n");
-    printf("key: %uB, value: %uB, number: %llu, mem_skiplist_size: %u\n", KEY_SIZE, VALUE_SIZE, ops_num,
-           mem_skiplist_size);
-    printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", 1.0 * tmp2 * 1e-6,
-           1.0 * (KEY_SIZE + VALUE_SIZE) * ops_num * 1e6 / tmp2 / 1048576, 1.0 * ops_num * 1e6 / tmp2);
-    printf("-------------   write to dram  not flush ---  end: ------------------------\n");
-}
+    Config(string path_dir, string log_path_dir, uint64_t nvm_size,
+           size_t key_size, size_t value_size, uint64_t ops_num, uint64_t get_after_insert,
+           size_t mem_skiplist_size, size_t skiplist_max_num,
+           bool using_existing_data, bool nvm_direct, EngineType type) :
+            path_(std::move(path_dir)),
+            log_path_(std::move(log_path_dir)),
+            nvm_size_(nvm_size),
+            value_size_(value_size),
+            key_size_(key_size),
+            ops_num_(ops_num),
+            get_after_insert_(get_after_insert),
+            mem_skiplist_size_(mem_skiplist_size * 1024 * 1024),
+            skiplist_max_num_(skiplist_max_num),
+            using_existing_data_(using_existing_data),
+            nvm_direct_(nvm_direct),
+            enging_(type) {}
 
-void nvm_print() {
-    printf("-------------   write to nvm  start: ----------------------\n");
-    printf("key: %uB, value: %uB, number: %llu\n", KEY_SIZE, VALUE_SIZE, ops_num);
-    printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", 1.0 * use_time * 1e-6,
-           1.0 * (KEY_SIZE + VALUE_SIZE) * ops_num * 1e6 / use_time / 1048576, 1.0 * ops_num * 1e6 / use_time);
-    printf("-------------   write to nvm  end: ----------------------\n");
-}
+    Config(Config &config)
+            : path_(config.path_),
+              log_path_(config.log_path_),
+              nvm_size_(config.nvm_size_),
+              value_size_(config.value_size_),
+              key_size_(config.key_size_),
+              ops_num_(config.ops_num_),
+              get_after_insert_(config.get_after_insert_),
+              mem_skiplist_size_(config.mem_skiplist_size_),
+              skiplist_max_num_(config.skiplist_max_num_),
+              using_existing_data_(config.using_existing_data_),
+              nvm_direct_(config.nvm_direct_),
+              enging_(config.enging_) {}
+};
 
-// 需要另外开一个线程负责模拟KV写入DRAM的skiplist结构
-// 模拟数据写入到DRAM的跳表结构中
-void write_to_dram() {
-    CZL_PRINT("start!");
-    auto rnd = rocksdb::Random::GetTLSInstance();
-    char buf[buf_size];
-    memset(buf, 0, sizeof(buf));
-    string value(VALUE_SIZE, 'v');
+class RunBenchmark {
+public:
+    RunBenchmark(Config &&para_config) : config(para_config) {
+        output_interval = (1024 * 1024) / config.value_size_ * 1024 - 1;
+        skiplist_nvm = new rocksdb::PersistentSkiplistWrapper();
+        skiplist_nvm->Init(config.path_, config.nvm_size_, 20, 2, config.key_size_, config.ops_num_, output_interval);
 
-    start_time = get_now_micros();
-    last_tmp_time = start_time;
-    size_t per_1g_num = (1024 * 1000) / VALUE_SIZE * 1000;
-    //string batch;
-    for (uint64_t i = 1; i <= ops_num; i++) {
-        auto number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
-        string insert_data(buf);
-        skiplist_dram->Insert(insert_data);
+        CZL_PRINT("prepare to create PATH_LOG:%s", PATH_LOG);
+        // KV write DRAM skiplist, and then background thread write it to NVM
+        if (!config.nvm_direct_) {
+            tpool = new ThreadPool(2);          // create threadpool(thread number = 2)
+            skiplist_dram = new rocksdb::SkiplistWriteNVM();
+            skiplist_dram->Init(
+                    config.log_path_,
+                    skiplist_nvm,
+                    12,
+                    4,
+                    config.mem_skiplist_size_,
+                    config.skiplist_max_num_,
+                    config.key_size_);
+        }
+    }
+
+    ~RunBenchmark() {
+        delete tpool;
+        delete skiplist_dram;
+        delete skiplist_nvm;
+    }
+
+    void Run() {
+        start_ = chrono::high_resolution_clock::now();
+        if (!config.nvm_direct_) {
+            // create new thread, beginning with write_to_dram()
+            write_to_dram();
+            end_ = chrono::high_resolution_clock::now();
+
+            dram_not_flush_print();
+            skiplist_dram->Flush();     // write DRAM data to NVM.
+            end_ = chrono::high_resolution_clock::now();
+        } else {
+            write_to_nvm();
+            end_ = chrono::high_resolution_clock::now();
+            //skiplist_nvm->PrintLevelNum();
+            skiplist_nvm->Print();
+        }
+        if (!config.nvm_direct_) {
+            dram_print();
+        } else {
+            nvm_print();
+        }
+    }
+
+private:
+
+    // parse input parameter: ok return 0, else return -1;
+    int parse_input(int num, char **para) {
+        CZL_PRINT("num=%d", num);
+        if (num != 8) {
+            cout << "input parameter nums incorrect! " << num << endl;
+            return -1;
+        }
+
+        int using_existing_data = atoi(para[1]);
+        int test_type = atoi(para[2]);
+        int value_size = atoi(para[3]);
+        int ops_type = atoi(para[4]);
+        int ops_num = atoi(para[5]);
+        int mem_skiplist_size = atoi(para[6]);
+        int skiplist_max_num = atoi(para[7]);
+
+        CZL_PRINT("buf_size:%u", buf_size);
+        CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
+        CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, VALUE_SIZE);
+        CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
+        CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
+
+        assert((test_type >> 1) == 0);
+        assert((value_size & (value_size - 1)) == 0);
+        assert(skiplist_max_num >= 1 && skiplist_max_num <= 20);
+        return 0;
+    }
+
+    void write_to_nvm(bool single = false) {
+        CZL_PRINT("start!");
+        auto rnd = rocksdb::Random::GetTLSInstance();
+        char buf[config.key_size_ + config.value_size_];
+        memset(buf, 0, sizeof(buf));
+        string value(config.value_size_, 'v');
+        auto start = chrono::high_resolution_clock::now();
+        auto last_time = start;
+        Statistic stats;
+        /*vector<vector<string>*> ops_key;
+        for(size_t i = 0; i < 1024; i++){
+            ops_key.push_back(new vector<string>);
+        }*/
+        for (uint64_t i = 1; i <= config.ops_num_; i++) {
+            uint64_t number = rnd->Next() % config.ops_num_;
+            snprintf(buf, sizeof(buf), "%08llu%010llu%s", number, i, value.c_str());
+            string data(buf);
+            string key(buf, 18);
+            size_t pos;
+            if (single) {
+                pos = skiplist_nvm->Insert(data, 0, stats);
+            } else {
+                pos = skiplist_nvm->Insert(data, stats);
+            }
+            //ops_key[pos]->push_back(std::move(key));
 
 #ifdef EVERY_1G_PRINT
-        if ((i % per_1g_num) == 0) {
-            tmp_time = get_now_micros();
-            tmp_use_time = tmp_time - last_tmp_time;
-            printf("every 1GB (%dGB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n", (i / per_1g_num), 1.0 * tmp_use_time * 1e-6, 1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / tmp_use_time / 1048576, 1.0 * per_1g_num * 1e6 / tmp_use_time);
-            last_tmp_time = tmp_time;
-        }
-#endif
-    }
-    dram_not_flush_print();
-    skiplist_dram->Flush();     // write DRAM data to NVM.
-}
-
-void do_get(vector<vector<string>*>& keys){
-    cout<<keys.size()<<endl;
-    for(int i = 0; i < GET_AFTER_INSERT; i++){
-        auto rnd = rocksdb::Random::GetTLSInstance();
-        size_t table_pos = rnd->Next() % keys.size();
-        vector<string> &v = *keys[table_pos];
-        size_t key_pos = rnd->Next() % v.size();
-        skiplist_nvm->Get(v[key_pos]);
-    }
-}
-
-void do_get(vector<string>& keys, size_t which){
-    for(int i = 0; i < GET_AFTER_INSERT; i++){
-        auto rnd = rocksdb::Random::GetTLSInstance();
-        size_t pos = rnd->Next() % keys.size();
-        skiplist_nvm->Get(keys[pos], which);
-    }
-}
-
-void write_to_nvm(bool single = false) {
-    CZL_PRINT("start!");
-    auto rnd = rocksdb::Random::GetTLSInstance();
-    char buf[buf_size];
-    memset(buf, 0, sizeof(buf));
-    string value(VALUE_SIZE, 'v');
-    start_time = get_now_micros();
-    auto start = chrono::high_resolution_clock::now();
-    //last_tmp_time = start_time;
-    auto last_time = start;
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 1024 - 1;
-    Statistic stats;
-    /*vector<vector<string>*> ops_key;
-    for(size_t i = 0; i < 1024; i++){
-        ops_key.push_back(new vector<string>);
-    }*/
-    for (uint64_t i = 1; i <= ops_num; i++) {
-        uint32_t number = rnd->Next() % ops_num;
-        snprintf(buf, sizeof(buf), "%08d%010d%s", number, i, value.c_str());
-        string data(buf);
-        string key(buf, 18);
-        size_t pos;
-        if(single){
-            pos = skiplist_nvm->Insert(data, 0, stats);
-        }else{
-            pos = skiplist_nvm->Insert(data, stats);
-        }
-        //ops_key[pos]->push_back(std::move(key));
-
-#ifdef EVERY_1G_PRINT
-        if ((i % per_1g_num) == 0) {
+            if ((i % output_interval) == 0) {
             auto middle_time = chrono::high_resolution_clock::now();
-            //tmp_time = get_now_micros();
-            //tmp_use_time = tmp_time - last_tmp_time;
             chrono::duration<double, std::micro> diff = middle_time - last_time;
-            /*printf("every 1GB(%dnd GB): time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
-                   (i / per_1g_num), 1.0 * diff.count() * 1e-6,
-                   1.0 * (KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / diff.count() / 1048576,
-                   1.0 * per_1g_num * 1e6 / diff.count());*/
             cout<<fixed<<setprecision(4)
-                <<"every_1GB("<<i / per_1g_num<<"th):"
+                <<"every_1GB("<<i / output_interval<<"th):"
                 <<" time: "<<diff.count() * 1e-6<<" s,"
-                <<" throughput: "<<(KEY_SIZE + VALUE_SIZE) * per_1g_num * 1e6 / diff.count() / 1048576<<" MB/s,"
-                <<" IOPS: "<<per_1g_num * 1e6 / diff.count()<<" IOPS\n";
-            //last_tmp_time = tmp_time;
+                <<" throughput: "<<(config.key_size_ + config.value_size_) * output_interval * 1e6 / diff.count() / 1048576<<" MB/s,"
+                <<" IOPS: "<<output_interval * 1e6 / diff.count()<<" IOPS\n";
             last_time = middle_time;
             stats.print_latency();
             stats.clear_period();
-
-            /*auto start_get = chrono::high_resolution_clock::now();
-            do_get(ops_key);
-            auto end_get = chrono::high_resolution_clock::now();
-            chrono::duration<double, std::micro> get_diff = end_get - start_get;
-            cout<<fixed<<setprecision(4)
-                <<"read 1000op"
-                <<" time: "<<get_diff.count()<<" micros"
-                <<" iops: "<<GET_AFTER_INSERT / get_diff.count()<<" IOPS"
-                <<" avg_time_per_op: "<<get_diff.count() / GET_AFTER_INSERT<<"\n";
-            ops_key.clear();*/
-            // TODO: remove gettime from overall time calculation
         }
 #endif
-    }
-
-    /*if(single){
-        // get in a table which is 0
-        stats.clear_period();
-        stats.start();
-        do_get(*ops_key[0], 0);
-        stats.end();
-        stats.print_cur();
-    }else{
-        // get in a table which is one of 1024
-        stats.clear_period();
-        stats.start();
-        do_get(*ops_key[0], 0);
-        stats.end();
-        stats.print_cur();
-
-        // get in overall 1024 table
-        stats.clear_period();
-        stats.start();
-        do_get(ops_key);
-        stats.end();
-        stats.print_cur();
-
-        for(auto v: ops_key){
-            v->clear();
-            delete v;
         }
-    }*/
 
-    //skiplist_nvm->PrintLevelNum();
-    skiplist_nvm->Print();
-    CZL_PRINT("end!");
-}
+        /*if(single){
+            // get in a table which is 0
+            stats.clear_period();
+            stats.start();
+            do_get(*ops_key[0], 0);
+            stats.end();
+            stats.print_cur();
+        }else{
+            // get in a table which is one of 1024
+            stats.clear_period();
+            stats.start();
+            do_get(*ops_key[0], 0);
+            stats.end();
+            stats.print_cur();
 
-// parse input parameter: ok return 0, else return -1;
-int parse_input(int num, char **para) {
-    CZL_PRINT("num=%d", num);
-    if (num != 8) {
-        cout << "input parameter nums incorrect! " << num << endl;
-        return -1;
+            // get in overall 1024 table
+            stats.clear_period();
+            stats.start();
+            do_get(ops_key);
+            stats.end();
+            stats.print_cur();
+
+            for(auto v: ops_key){
+                v->clear();
+                delete v;
+            }
+        }*/
+        CZL_PRINT("end!");
     }
 
-    using_existing_data = atoi(para[1]);
-    test_type = atoi(para[2]);
-    VALUE_SIZE = atoi(para[3]);
-    ops_type = atoi(para[4]);
-    ops_num = atoi(para[5]);
-    mem_skiplist_size = atoi(para[6]);
-    skiplist_max_num = atoi(para[7]);
+// 需要另外开一个线程负责模拟KV写入DRAM的skiplist结构
+// 模拟数据写入到DRAM的跳表结构中
+    void write_to_dram() {
+        CZL_PRINT("start!");
+        auto rnd = rocksdb::Random::GetTLSInstance();
+        char buf[config.key_size_ + config.value_size_];
+        memset(buf, 0, sizeof(buf));
+        string value(config.value_size_, 'v');
+        /*start_time = get_now_micros();
+        last_tmp_time = start_time;*/
+        auto start = chrono::high_resolution_clock::now();
+        auto last_time = start;
+        //string batch;
+        for (uint64_t i = 1; i <= config.ops_num_; i++) {
+            auto number = rnd->Next() % config.ops_num_;
+            snprintf(buf, sizeof(buf), "%08d%08d%s", number, i, value.c_str());
+            string insert_data(buf);
+            skiplist_dram->Insert(insert_data);
 
-    buf_size = KEY_SIZE + VALUE_SIZE + 1;
+#ifdef EVERY_1G_PRINT
+            if ((i % output_interval) == 0) {
+                /*tmp_time = get_now_micros();
+                tmp_use_time = tmp_time - last_tmp_time;*/
+                auto middle_time = chrono::high_resolution_clock::now();
+                chrono::duration<double, std::micro> diff = middle_time - last_time;
+                cout<<"every 1GB ("<<i / output_interval<<"GB):"
+                    <<" time: "<< 1.0 * diff.count() * 1e-6<<" s,"
+                    <<" speed: "<<1.0 * entry_size * output_interval * 1e6 / diff.count() / 1048576<<" MB/s,"
+                    <<" IOPS: "<<1.0 * output_interval * 1e6 / diff.count()<<" IOPS\n";
+                last_time = middle_time;
+            }
+#endif
+        }
+    }
 
-    CZL_PRINT("buf_size:%u", buf_size);
-    CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
-    CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, VALUE_SIZE);
-    CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
-    CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
+    void do_get(vector<vector<string> *> &keys) {
+        cout << keys.size() << endl;
+        for (int i = 0; i < config.get_after_insert_; i++) {
+            auto rnd = rocksdb::Random::GetTLSInstance();
+            size_t table_pos = rnd->Next() % keys.size();
+            vector<string> &v = *keys[table_pos];
+            size_t key_pos = rnd->Next() % v.size();
+            skiplist_nvm->Get(v[key_pos]);
+        }
+    }
 
-    assert((test_type >> 1) == 0);
-    assert((VALUE_SIZE & (VALUE_SIZE - 1)) == 0);
-//    assert(mem_skiplist_size <= 4096);
-    assert(skiplist_max_num >= 1 && skiplist_max_num <= 20);
-    return 0;
-}
+    void do_get(vector<string> &keys, size_t which) {
+        for (int i = 0; i < config.get_after_insert_; i++) {
+            auto rnd = rocksdb::Random::GetTLSInstance();
+            size_t pos = rnd->Next() % keys.size();
+            skiplist_nvm->Get(keys[pos], which);
+        }
+    }
+
+    void nvm_print() {
+        chrono::duration<double, std::micro> diff = end_ - start_;
+        printf("-------------   write to nvm  start: ----------------------\n");
+        printf("key: %zuB, value: %zuB, number: %llu\n", config.key_size_, config.value_size_, config.ops_num_);
+        printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
+               1.0 * diff.count() * 1e-6,
+               1.0 * (config.key_size_ + config.value_size_) * config.ops_num_ * 1e6 / diff.count() / 1048576,
+               1.0 * config.ops_num_ * 1e6 / diff.count());
+        printf("-------------   write to nvm  end: ----------------------\n");
+    }
+
+    void dram_print() {
+        chrono::duration<double, std::micro> diff = end_ - start_;
+        printf("-------------   write to dram  start: ----------------------\n");
+        printf("key: %zuB, value: %zuB, number: %llu, mem_skiplist_size: %zu\n",
+               config.key_size_,
+               config.value_size_,
+               config.ops_num_,
+               config.mem_skiplist_size_);
+        printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
+               1.0 * diff.count() * 1e-6,
+               1.0 * (config.key_size_ + config.value_size_) * config.ops_num_ * 1e6 / diff.count() / 1048576,
+               1.0 * config.ops_num_ * 1e6 / diff.count());
+        printf("-------------   write to dram   end: ------------------------\n");
+    }
+
+    void dram_not_flush_print() {
+        chrono::duration<double, std::micro> diff = end_ - start_;
+        printf("-------------   write to dram  not flush  --- start: ----------------------\n");
+        printf("key: %zuB, value: %zuB, number: %llu, mem_skiplist_size: %zu\n",
+               config.key_size_,
+               config.value_size_,
+               config.ops_num_,
+               config.skiplist_max_num_);
+        printf("time: %.4f s,  speed: %.3f MB/s, IOPS: %.1f IOPS\n",
+               1.0 * diff.count() * 1e-6,
+               1.0 * (config.key_size_ + config.value_size_) * config.ops_num_ * 1e6 / diff.count() / 1048576,
+               1.0 * config.ops_num_ * 1e6 / diff.count());
+        printf("-------------   write to dram  not flush ---  end: ------------------------\n");
+    }
+
+    const Config config;
+    size_t output_interval;
+    rocksdb::SkiplistWriteNVM *skiplist_dram;
+    rocksdb::PersistentSkiplistWrapper *skiplist_nvm;
+    ThreadPool *tpool;
+    chrono::high_resolution_clock::time_point start_;
+    chrono::high_resolution_clock::time_point end_;
+};
 
 /* parameter: 
  *    @using_existing_data: whether using old data or not(read operations must rely on existing data on NVM)
@@ -262,45 +371,46 @@ int parse_input(int num, char **para) {
  */
 int main(int argc, char **argv) {
     // parse parameter
-    int res = parse_input(argc, argv);
-    if (res < 0) {
-        cout << "parse parameter failed!" << endl;
-        return 0;
-    }
-    size_t per_1g_num = (1024 * 1024) / VALUE_SIZE * 64 - 1;
-    skiplist_nvm = new rocksdb::PersistentSkiplistWrapper();
-    skiplist_nvm->Init(PATH, NVM_SIZE, 20, 2, KEY_SIZE, ops_num, per_1g_num);
-
-    CZL_PRINT("prepare to create PATH_LOG:%s", PATH_LOG);
-    // KV write DRAM skiplist, and then background thread write it to NVM
-    if (test_type == 1) {
-        tpool = new ThreadPool(2);          // create threadpool(thread number = 2)
-
-        skiplist_dram = new rocksdb::SkiplistWriteNVM();
-        skiplist_dram->Init(PATH_LOG, skiplist_nvm, 12, 4, mem_skiplist_size * 1024 * 1024, skiplist_max_num, KEY_SIZE);
-
-        thread t(write_to_dram); // create new thread, beginning with write_to_dram()
-
-        t.join();
-        delete tpool;
-
-        delete skiplist_dram;
-    } else {
-        thread t1(write_to_nvm, false);
-        t1.join();
-
-        /*thread t2(write_to_nvm, true);
-        t2.join();*/
+    CZL_PRINT("num=%d", argc);
+    if (argc != 8) {
+        cout << "input parameter nums incorrect! " << argc << endl;
+        return -1;
     }
 
-    end_time = get_now_micros();
-    use_time = end_time - start_time;
-    if (test_type == 1) {
-        dram_print();
-    } else {
-        nvm_print();
-    }
+    bool using_existing_data = atoi(argv[1]) == 1;
+    bool nvm_direct = atoi(argv[2]) == 0;
+    int value_size = atoi(argv[3]);
+    int ops_type = atoi(argv[4]);
+    int ops_num = atoi(argv[5]);
+    int mem_skiplist_size = atoi(argv[6]);
+    int skiplist_max_num = atoi(argv[7]);
 
-    delete skiplist_nvm;
+    CZL_PRINT("buf_size:%u", buf_size);
+    CZL_PRINT("using_existing_data: %d(0:no, 1:yes)", using_existing_data);
+    CZL_PRINT("test_type:%u(0:NVM, 1:DRAM)  value_size:%u", test_type, value_size);
+    CZL_PRINT("ops_type:%d      ops_num:%llu", ops_type, ops_num);
+    CZL_PRINT("mem_skiplist_size:%uMB   skiplist_max_num:%u", mem_skiplist_size, skiplist_max_num);
+
+    //assert((test_type >> 1) == 0);
+    assert((value_size & (value_size - 1)) == 0);
+    assert(skiplist_max_num >= 1 && skiplist_max_num <= 20);
+
+    Config config(
+            NVM_PATH,
+            NVM_LOG_PATH,
+            NVM_SIZE,
+            18/*key_size*/,
+            value_size,
+            ops_num,
+            10000/*get_after_insert*/,
+            mem_skiplist_size,
+            skiplist_max_num,
+            using_existing_data,
+            nvm_direct,
+            SKIPLIST
+            );
+
+    auto benckmark = new RunBenchmark(std::move(config));
+    benckmark->Run();
     return 0;
 }

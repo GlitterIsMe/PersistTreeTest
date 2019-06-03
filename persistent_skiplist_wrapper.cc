@@ -2,7 +2,10 @@
 #include <city.h>
 #include <string>
 #include <cassert>
+#include <iostream>
 #include "statistic.h"
+#include "error.h"
+using std::cout;
 
 namespace rocksdb {
 
@@ -28,11 +31,18 @@ PersistentSkiplistWrapper::Init(const std::string &path, uint64_t size, int32_t 
                                 size_t key_size, uint64_t opt_num, size_t per_1g_num) {
     //allocator_ = new PersistentAllocator(path, size);
     size_t count = 0;
-    allocator_ = new PersistentAllocator(path, size);
-    for (auto &list : skiplists_) {
-        list = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num, per_1g_num);
+    try {
+        allocator_ = new PersistentAllocator(path, size);
+        for (auto &list : skiplists_) {
+            list = new Persistent_SkipList(allocator_, max_height, branching_factor, key_size, opt_num, per_1g_num);
+        }
+        key_size_ = key_size;
+    }catch (AllocatorMapFailed& e){
+        cout<<e.what()<<"\n";
+        exit(-1);
+    }catch (AllocatorNotPM& e){
+        cout<<"mapped space is not space"<<"\n";
     }
-    key_size_ = key_size;
 }
 
 size_t PersistentSkiplistWrapper::Insert(const std::string &key, Statistic &stats) {

@@ -42,4 +42,3 @@ class PersistentSkiplistWrapper {
     };
 }
 
-extern rocksdb::PersistentSkiplistWrapper* skiplist_nvm;

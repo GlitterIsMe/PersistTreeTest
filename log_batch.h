@@ -134,6 +134,3 @@ class Memory_SkipList {
         void FindNextNode(const std::string &key, DramNode** prev);
     };
 }
-
-// thread pool
-extern ThreadPool *tpool;       // constructor parameter list initialize it.
