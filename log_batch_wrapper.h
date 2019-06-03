@@ -7,7 +7,7 @@
 #include <atomic>
 #include "thread_pool.h"
 #include "flush_nvm.h"
-#include "persistent_skiplist_no_transaction.h"
+#include "persistent_allocator.h"
 
 namespace rocksdb {
     static std::queue<FlushNVM> queue_;

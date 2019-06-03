@@ -1,6 +1,6 @@
 #pragma once
 
-#include "persistent_skiplist_no_transaction.h"
+#include "persistent_allocator.h"
 #include "basic_define.h"
 #include "persistent_skip_list.h"
 #include <array>

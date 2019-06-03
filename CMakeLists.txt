@@ -25,7 +25,7 @@ set(src
         persistent_skiplist_no_transaction.cc
         persistent_skiplist_wrapper.cc
         random.cc
-        statistic.cc)
+        statistic.cc persistent_allocator.cc persistent_allocator.h)
 
 
 include(FindThreads)

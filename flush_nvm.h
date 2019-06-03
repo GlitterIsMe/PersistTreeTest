@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdio>
 #include "log_batch.h"
-#include "persistent_skiplist_no_transaction.h"
+#include "persistent_allocator.h"
 #include "persistent_skiplist_wrapper.h"
 
 using namespace std;

@@ -5,7 +5,7 @@
 #include "libpmem.h"
 #include "random.h"
 #include "nvm_node.h"
-#include "persistent_skiplist_no_transaction.h"
+#include "persistent_allocator.h"
 class Statistic;
 
 namespace rocksdb {

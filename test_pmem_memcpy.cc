@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "libpmem.h"
-#include "persistent_skiplist_no_transaction.h"
+#include "persistent_allocator.h"
 #define PATH "/home/czl/pmem0/skiplist_test_dir/persistent_skiplist"
 
 using namespace::std;
@@ -14,7 +14,7 @@ struct TestNode{
 };
 
 int main(){
-    rocksdb::PersistentAllocator* allocator_=new rocksdb::PersistentAllocator(PATH, 50);
+    PersistentAllocator* allocator_=new PersistentAllocator(PATH, 50);
     string key = "77777";
     char *mem = allocator_->Allocate(sizeof(TestNode) );
     char *pkey = allocator_->Allocate(key.size());
