@@ -365,6 +365,7 @@ int main(int argc, char **argv) {
     cout<<"OpsNum: "<<ops_num<<"("<<ops_num * value_size / 1048576.0<<")MB estimated\n";
     cout<<"Size of Memtable in Memory: "<<mem_skiplist_size<<" MB\n";
     cout<<"Max Skiplist Num: "<<skiplist_max_num<<"\n";
+    cout<<"Data Structure: Skiplist\n";
 
     //assert((test_type >> 1) == 0);
     assert((value_size & (value_size - 1)) == 0);
