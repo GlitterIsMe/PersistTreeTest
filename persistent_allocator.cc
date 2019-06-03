@@ -12,10 +12,10 @@ PersistentAllocator::PersistentAllocator(const std::string path, uint64_t size) 
     pmemaddr_ = static_cast<char *>(pmem_map_file(path.c_str(), size, PMEM_FILE_CREATE, 0666, &mapped_len_, &is_pmem_));
 
     if (pmemaddr_ == NULL) {
-        throw AllocatorMapFailed;
+        throw AllocatorMapFailed();
     }
     if (!is_pmem_) {
-        throw AllocatorNotPM;
+        throw AllocatorNotPM();
     }
     capacity_ = size;
     cur_index_ = 0;
@@ -27,7 +27,7 @@ PersistentAllocator::~PersistentAllocator() {
 
 char *PersistentAllocator::Allocate(size_t bytes) {
     if (cur_index_ + bytes > mapped_len_) {
-        throw AllocatorSpaceRunOut;
+        throw AllocatorSpaceRunOut();
     }
     char *result = pmemaddr_ + cur_index_;
     cur_index_ += bytes;
@@ -36,7 +36,7 @@ char *PersistentAllocator::Allocate(size_t bytes) {
 
 char *PersistentAllocator::AllocateAligned(size_t bytes, size_t huge_page_size) {
     if (cur_index_ + bytes > mapped_len_) {
-        throw AllocatorSpaceRunOut;
+        throw AllocatorSpaceRunOut();
     }
     char *result = pmemaddr_ + cur_index_;
     cur_index_ += bytes;
