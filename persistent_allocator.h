@@ -34,6 +34,6 @@ private:
     size_t mapped_len_;
     uint64_t capacity_;
     int is_pmem_;
-    char* cur_index_;
+    size_t cur_index_;
 };
 }

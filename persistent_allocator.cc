@@ -18,7 +18,7 @@ PersistentAllocator::PersistentAllocator(const std::string path, uint64_t size) 
         throw AllocatorNotPM;
     }
     capacity_ = size;
-    cur_index_ = pmemaddr_;
+    cur_index_ = 0;
 }
 
 PersistentAllocator::~PersistentAllocator() {
@@ -29,13 +29,16 @@ char *PersistentAllocator::Allocate(size_t bytes) {
     if (cur_index_ + bytes > mapped_len_) {
         throw AllocatorSpaceRunOut;
     }
-    char *result = cur_index_;
+    char *result = pmemaddr_ + cur_index_;
     cur_index_ += bytes;
     return result;
 }
 
 char *PersistentAllocator::AllocateAligned(size_t bytes, size_t huge_page_size) {
-    char *result = cur_index_;
+    if (cur_index_ + bytes > mapped_len_) {
+        throw AllocatorSpaceRunOut;
+    }
+    char *result = pmemaddr_ + cur_index_;
     cur_index_ += bytes;
     return result;
 }
