@@ -358,6 +358,7 @@ int main(int argc, char **argv) {
 
     time_t now = time(0);
     char* dt = ctime(&now);
+    cout<<"---------------------------------------------------------\n";
     cout<<"Time: "<<dt<<"\n";
     cout<<"Using Existing Data: "<<using_existing_data<<" (0:no, 1:yes)\n";
     cout<<"Write To NVM Directly: "<<nvm_direct<<"\n";
