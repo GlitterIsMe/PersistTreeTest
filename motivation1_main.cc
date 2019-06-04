@@ -55,6 +55,8 @@ struct Config {
     const bool nvm_direct_;
     const EngineType enging_;
 
+    const size_t skiplist_num_;
+
     Config(string path_dir) :
             path_(path_dir),
             log_path_(path_dir),
@@ -67,12 +69,13 @@ struct Config {
             skiplist_max_num_(1),
             using_existing_data_(false),
             nvm_direct_(false),
-            enging_(DEFAULT) {}
+            enging_(DEFAULT),
+            skiplist_num_(1){}
 
     Config(string path_dir, string log_path_dir, uint64_t nvm_size,
            size_t key_size, size_t value_size, uint64_t ops_num, uint64_t get_after_insert,
            size_t mem_skiplist_size, size_t skiplist_max_num,
-           bool using_existing_data, bool nvm_direct, EngineType type) :
+           bool using_existing_data, bool nvm_direct, EngineType type, size_t skiplist_num) :
             path_(std::move(path_dir)),
             log_path_(std::move(log_path_dir)),
             nvm_size_(nvm_size),
@@ -84,7 +87,8 @@ struct Config {
             skiplist_max_num_(skiplist_max_num),
             using_existing_data_(using_existing_data),
             nvm_direct_(nvm_direct),
-            enging_(type) {}
+            enging_(type),
+            skiplist_num_(skiplist_num){}
 
     Config(Config &config)
             : path_(config.path_),
@@ -98,7 +102,8 @@ struct Config {
               skiplist_max_num_(config.skiplist_max_num_),
               using_existing_data_(config.using_existing_data_),
               nvm_direct_(config.nvm_direct_),
-              enging_(config.enging_) {}
+              enging_(config.enging_),
+              skiplist_num_(config.skiplist_num_){}
 };
 
 class RunBenchmark {
@@ -343,7 +348,7 @@ private:
 int main(int argc, char **argv) {
     // parse parameter
     CZL_PRINT("num=%d", argc);
-    if (argc != 8) {
+    if (argc != 9) {
         cout << "input parameter nums incorrect! " << argc << endl;
         return -1;
     }
@@ -355,6 +360,7 @@ int main(int argc, char **argv) {
     int ops_num = atoi(argv[5]);
     int mem_skiplist_size = atoi(argv[6]);
     int skiplist_max_num = atoi(argv[7]);
+    int nvm_skiplist_num = atoi(argv[8]);
 
     time_t now = time(0);
     char* dt = ctime(&now);
@@ -366,7 +372,7 @@ int main(int argc, char **argv) {
     cout<<"OpsNum: "<<ops_num<<"("<<ops_num * value_size / 1024.0<<")MB estimated\n";
     cout<<"Size of Memtable in Memory: "<<mem_skiplist_size<<" MB\n";
     cout<<"Max Skiplist Num: "<<skiplist_max_num<<"\n";
-    cout<<"Data Structure: Skiplist\n";
+    cout<<"Data Structure: "<<nvm_skiplist_num<<"-Skiplist\n";
 
     //assert((test_type >> 1) == 0);
     assert((value_size & (value_size - 1)) == 0);
@@ -384,7 +390,8 @@ int main(int argc, char **argv) {
             skiplist_max_num,
             using_existing_data,
             nvm_direct,
-            SKIPLIST
+            SKIPLIST,
+            nvm_skiplist_num
             );
 
     auto benckmark = new RunBenchmark(std::move(config));
