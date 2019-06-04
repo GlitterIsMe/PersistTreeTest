@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
     cout<<"Using Existing Data: "<<using_existing_data<<" (0:no, 1:yes)\n";
     cout<<"Write To NVM Directly: "<<nvm_direct<<"\n";
     cout<<"Key Size: "<<18<<" Bytes\nValue Size: "<<value_size<<" Bytes\n";
-    cout<<"OpsNum: "<<ops_num<<"("<<ops_num * value_size / 1048576.0<<")MB estimated\n";
+    cout<<"OpsNum: "<<ops_num<<"("<<ops_num * value_size / 1024.0<<")MB estimated\n";
     cout<<"Size of Memtable in Memory: "<<mem_skiplist_size<<" MB\n";
     cout<<"Max Skiplist Num: "<<skiplist_max_num<<"\n";
     cout<<"Data Structure: Skiplist\n";
