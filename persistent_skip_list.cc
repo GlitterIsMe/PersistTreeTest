@@ -26,17 +26,17 @@ namespace rocksdb {
 #endif
         try {
             prev_ = reinterpret_cast<Node**>(allocator_->Allocate(sizeof(Node*) * kMaxHeight_));
-            for (int i = 0; i < kMaxHeight_; i++) {
-                head_->SetNext(i, nullptr);
-                prev_[i] = head_;
-                pmem_flush(prev_ + i, sizeof(Node*));
-            }
-            pmem_drain();
-            prev_height_ = 1;
         }catch (AllocatorSpaceRunOut& e){
             cout<<"NVM space is running out"<<"\n";
             exit(-1);
         }
+        for (int i = 0; i < kMaxHeight_; i++) {
+            head_->SetNext(i, nullptr);
+            prev_[i] = head_;
+            pmem_flush(prev_ + i, sizeof(Node*));
+        }
+        pmem_drain();
+        prev_height_ = 1;
     }
 
     Node* Persistent_SkipList::NewNode(const std::string &key, int height) {
@@ -44,17 +44,17 @@ namespace rocksdb {
         try {
             char* mem = allocator_->Allocate(sizeof(Node) + sizeof(Node*) * (height - 1));
             char* pkey = allocator_->Allocate(key.size());
-            if(is_pmem){
-                pmem_memcpy_persist(pkey, key.c_str(), key.size());
-            }else{
-                memcpy(pkey, key.c_str(), key.size());
-                pmem_msync(pkey, key.size());
-            }
-            return new (mem) Node(pkey);
         }catch (AllocatorSpaceRunOut& e){
             cout<<"NVM space is running out"<<"\n";
             exit(-1);
         }
+        if(is_pmem){
+            pmem_memcpy_persist(pkey, key.c_str(), key.size());
+        }else{
+            memcpy(pkey, key.c_str(), key.size());
+            pmem_msync(pkey, key.size());
+        }
+        return new (mem) Node(pkey);
     }
 
     int Persistent_SkipList::RandomHeight() {
